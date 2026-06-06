@@ -379,7 +379,7 @@
   <script>
     (async function() {
       // CONFIGURATION
-      const configRes = await fetch('config.json');
+      const configRes = await fetch('config.pub.json');
       const CONFIG = await configRes.json();
       const API_BASE = CONFIG.API_BASE;
       
