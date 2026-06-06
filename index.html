@@ -429,22 +429,38 @@
         const errorEl = document.getElementById('auth-error');
         
         const body = { username, password };
-        if (isRegister) body.turnstileToken = turnstile.getResponse();
-
-        const res = await fetch(`${API_BASE}/auth/${isRegister ? 'register' : 'login'}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        
-        const data = await res.json();
-        if (data.token) {
-          localStorage.setItem('tta_token', data.token);
-          location.reload();
-        } else {
-          errorEl.innerText = data.error || "Failed";
+        if (isRegister) {
+          // Client-side password check
+          const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+          if (!passwordRegex.test(password)) {
+            errorEl.innerText = "Password must be at least 8 characters long and contain both a letter and a number.";
+            return;
+          }
+          body.turnstileToken = turnstile.getResponse();
+          if (!body.turnstileToken) {
+            errorEl.innerText = "Please complete the captcha.";
+            return;
+          }
         }
-      };
+
+        try {
+          const res = await fetch(`${API_BASE}/auth/${isRegister ? 'register' : 'login'}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+
+          const data = await res.json();
+          if (data.token) {
+            localStorage.setItem('tta_token', data.token);
+            location.reload();
+          } else {
+            // If the response is not 2xx, the response might be a string (error message)
+            errorEl.innerText = typeof data === 'string' ? data : (data.error || "Authentication failed");
+          }
+        } catch (e) {
+          errorEl.innerText = "Connection error";
+        }      };
 
       if (!token) {
         authOverlay.style.display = 'flex';
