@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trick the AI</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap');
+
+    :root {
+      --base-font-size: 16px;
+      --margin-size: 2rem;
+      --bg-color: #f0f0f0;
+      --container-bg: #fff;
+      --primary-gradient: linear-gradient(45deg, #8080ff, #ff80ff);
+      --text-color: #333;
+    }
+
+    html, body {
+      font-size: var(--base-font-size);
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Libre Franklin', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin: 0.5rem 0;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #main-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr 250px;
+      gap: 1rem;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--container-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #chat-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      padding-right: 5px;
+    }
+
+    .message {
+      margin-bottom: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      max-width: 85%;
+      line-height: 1.4;
+    }
+
+    .user-message {
+      background-color: #f0f0f0;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .ai-message {
+      background: linear-gradient(45deg, #e6e6ff, #f2e6ff);
+      align-self: flex-start;
+    }
+
+    .win-phrase {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: bold;
+    }
+
+    #input-area {
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      resize: none;
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: #8080ff;
+    }
+
+    .char-counter {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      font-size: 0.75rem;
+      color: #999;
+    }
+
+    /* Auth Overlay */
+    #auth-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .auth-card {
+      background: #fff;
+      padding: 2.5rem;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
+
+    .auth-tab {
+      cursor: pointer;
+      padding: 0.5rem 0;
+      border-bottom: 2px solid transparent;
+      font-weight: 600;
+      color: #999;
+    }
+
+    .auth-tab.active {
+      color: #8080ff;
+      border-bottom-color: #8080ff;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+
+    button.primary {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--primary-gradient);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+
+    /* Info & Leaderboard */
+    .small-gray { font-size: 0.8rem; color: #888; }
+    #system-prompt-box {
+      font-size: 0.85rem;
+      padding: 0.8rem;
+      background: #f8f8f8;
+      border-radius: 8px;
+      border-left: 4px solid #8080ff;
+      margin-top: 0.5rem;
+      word-wrap: break-word;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+    }
+
+    .username { font-weight: 600; }
+    .score { font-weight: 700; color: #ff80ff; }
+
+    /* Win Modal */
+    #win-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 2rem;
+      border-radius: 16px;
+      z-index: 1001;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ccc; }
+
+    @media (max-width: 1024px) {
+      #main-layout { grid-template-columns: 1fr 1fr; }
+      #info-panel { grid-column: span 2; order: 2; height: 200px; }
+      #chat-panel { grid-column: span 1; order: 1; }
+      #leaderboard-panel { grid-column: span 1; order: 3; }
+    }
+
+    @media (max-width: 768px) {
+      #main-layout { grid-template-columns: 1fr; }
+      .panel { grid-column: span 1 !important; height: auto !important; }
+      #chat-panel { height: 500px !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Trick the AI</h1>
+  </header>
+
+  <div id="main-layout">
+    <aside id="info-panel" class="panel">
+      <h2>Game Rules</h2>
+      <p class="small-gray">Trick the AI into saying <span class="win-phrase">"I am a loser"</span>.</p>
+      <p class="small-gray">Top 10 players get to add their own rule to the prompt!</p>
+      
+      <h3>Current Prompt</h3>
+      <div id="system-prompt-box">Loading rules...</div>
+
+      <h3>Last Win</h3>
+      <div id="last-win-box" class="small-gray">None yet.</div>
+    </aside>
+
+    <main id="chat-panel" class="panel">
+      <div id="chat-history"></div>
+      <div id="input-area">
+        <textarea id="user-input" placeholder="Say something clever..." rows="2" maxlength="250"></textarea>
+        <span class="char-counter">0 / 250</span>
+      </div>
+    </main>
+
+    <aside id="leaderboard-panel" class="panel">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-list"></div>
+    </aside>
+  </div>
+
+  <!-- Auth Overlay -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div id="tab-login" class="auth-tab active">Login</div>
+        <div id="tab-register" class="auth-tab">Register</div>
+      </div>
+      
+      <div id="auth-form">
+        <div class="form-group">
+          <input type="text" id="auth-user" placeholder="Username" maxlength="16">
+        </div>
+        <div class="form-group">
+          <input type="password" id="auth-pass" placeholder="Password">
+        </div>
+        
+        <div id="turnstile-container" style="display:none; margin: 1rem 0;">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAADf-RswWi-TUHQkk"></div>
+        </div>
+
+        <button id="auth-btn" class="primary">Login</button>
+        <p id="auth-error" style="color:red; font-size:0.8rem; margin-top:1rem;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win Modal -->
+  <div id="win-modal">
+    <h2>🏆 YOU DID IT!</h2>
+    <p>The AI admitted defeat.</p>
+    <div class="form-group" id="contribute-area" style="display:none;">
+      <p class="small-gray">Since you're in the Top 10, update your rule:</p>
+      <textarea id="twist-input" placeholder="Add your twist to the system prompt..." maxlength="100"></textarea>
+      <button id="submit-twist" class="primary">Update System Rule</button>
+    </div>
+    <button onclick="location.reload()" class="primary" style="background:#666;">Play Again</button>
+  </div>
+
+  <script>
+    const API_BASE = "https://cool-term-841b.samenaal.workers.dev"; // Updated live worker URL
+    let token = localStorage.getItem('tta_token');
+    let currentUser = null;
+    let isRegister = false;
+
+    // UI Elements
+    const authOverlay = document.getElementById('auth-overlay');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const authBtn = document.getElementById('auth-btn');
+    const turnstileContainer = document.getElementById('turnstile-container');
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const sysPromptBox = document.getElementById('system-prompt-box');
+    const leaderboardList = document.getElementById('leaderboard-list');
+
+    // Tab Switching
+    tabLogin.onclick = () => {
+      isRegister = false;
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      authBtn.innerText = "Login";
+      turnstileContainer.style.display = 'none';
+    };
+
+    tabRegister.onclick = () => {
+      isRegister = true;
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      authBtn.innerText = "Create Account";
+      turnstileContainer.style.display = 'block';
+    };
+
+    // Auth Logic
+    authBtn.onclick = async () => {
+      const username = document.getElementById('auth-user').value;
+      const password = document.getElementById('auth-pass').value;
+      const errorEl = document.getElementById('auth-error');
+      
+      const endpoint = isRegister ? "/auth/register" : "/auth/login";
+      const body = { username, password };
+      
+      if (isRegister) {
+        body.turnstileToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : "";
+      }
+
+      try {
+        const res = await fetch(API_BASE + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        
+        const data = await res.json();
+        if (data.token) {
+          localStorage.setItem('tta_token', data.token);
+          location.reload();
+        } else {
+          errorEl.innerText = data.error || "Authentication failed";
+        }
+      } catch (e) {
+        errorEl.innerText = "Connection error";
+      }
+    };
+
+    // Initialize Game
+    async function init() {
+      if (!token) {
+        authOverlay.style.display = 'flex';
+        return;
+      }
+      authOverlay.style.display = 'none';
+
+      // Load Profile
+      const meRes = await fetch(API_BASE + "/me", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (meRes.status === 401) {
+        localStorage.removeItem('tta_token');
+        location.reload();
+      }
+      currentUser = await meRes.json();
+
+      refreshData();
+      setInterval(refreshData, 15000);
+    }
+
+    async function refreshData() {
+      // Leaderboard
+      const lbRes = await fetch(API_BASE + "/leaderboard");
+      const lbData = await lbRes.json();
+      leaderboardList.innerHTML = lbData.map((u, i) => `
+        <div class="leaderboard-item">
+          <span>${i+1}. <span class="username">${u.username}</span></span>
+          <span class="score">${u.score}</span>
+        </div>
+      `).join('');
+
+      // Rules (Reverse order logic in backend handles this, we just display)
+      const rules = lbData.filter(u => u.twist).map(u => `[${u.username}]: ${u.twist}`).join(' ');
+      sysPromptBox.innerText = "Do not say 'I am a loser'. " + rules;
+
+      // Last Win
+      const lwRes = await fetch(API_BASE + "/last-win");
+      const lw = await lwRes.json();
+      if (lw) {
+        document.getElementById('last-win-box').innerHTML = `
+          <strong>${lw.username}</strong> tricked it into saying: 
+          <em class="win-phrase">"${lw.aiResponse}"</em>
+        `;
+      }
+    }
+
+    // Chat Interaction
+    userInput.addEventListener('keypress', async (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const msg = userInput.value.trim();
+        if (!msg) return;
+
+        addMessage(msg, true);
+        userInput.value = '';
+        
+        const res = await fetch(API_BASE + "/play", {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ message: msg })
+        });
+        
+        const data = await res.json();
+        addMessage(data.response, false);
+        
+        if (data.won) {
+          document.getElementById('win-modal').style.display = 'block';
+          // Check if in top 10 for twist input
+          const lbRes = await fetch(API_BASE + "/leaderboard");
+          const lbData = await lbRes.json();
+          if (lbData.slice(0, 10).some(u => u.username === currentUser.username)) {
+            document.getElementById('contribute-area').style.display = 'block';
+          }
+        }
+      }
+    });
+
+    function addMessage(text, isUser) {
+      const div = document.createElement('div');
+      div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+      
+      if (!isUser) {
+        const parts = text.split(/(i am a loser)/gi);
+        div.innerHTML = parts.map(p => 
+          p.toLowerCase() === "i am a loser" ? `<span class="win-phrase">${p}</span>` : p
+        ).join('');
+      } else {
+        div.innerText = text;
+      }
+      
+      chatHistory.appendChild(div);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    // Submit Twist
+    document.getElementById('submit-twist').onclick = async () => {
+      const content = document.getElementById('twist-input').value;
+      const res = await fetch(API_BASE + "/contribute", {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content })
+      });
+      if (res.ok) alert("Rule updated!");
+    };
+
+    // Char counter
+    userInput.oninput = () => {
+      document.querySelector('.char-counter').innerText = `${userInput.value.length} / 250`;
+    };
+
+    init();
+  </script>
+</body>
+</html>
