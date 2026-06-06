@@ -2,408 +2,399 @@
 <html lang="en">
 
 <head>
-  <meta name="referrer" content="no-referrer-when-downgrade">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trick the AI</title>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
   <style>
-    /* REVERTED TO ORIGINAL CSS FROM WEB/WW */
-    .small-gray-text {
-      font-size: 0.8em;
-      color: #888;
-    }
-
-    #info-container p#system-prompt {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 0.8em;
-      color: #666;
-      margin-top: 1rem;
-      padding: 0.5rem;
-      background-color: #f0f0f0;
-      border-radius: 0.3125rem;
-    }
-
-    #original-premise {
-      background: linear-gradient(45deg, #8080ff, #ff80ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: bold;
-    }
-
-    @font-face {
-      font-family: 'Franklin Gothic';
-      src: url('https://storage.wildwest.gg/uploads/1730265677765_franklin_gothic.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap');
 
     :root {
       --base-font-size: 16px;
-      --margin-size: 8rem;
+      --margin-size: 2rem;
+      --bg-color: #f0f0f0;
+      --container-bg: #fff;
+      --primary-gradient: linear-gradient(45deg, #8080ff, #ff80ff);
+      --text-color: #333;
     }
 
-    html,
-    body {
+    html, body {
       font-size: var(--base-font-size);
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
+      font-family: 'Libre Franklin', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
     }
 
     body {
-      font-family: 'Franklin Gothic', sans-serif;
-      background-color: #f0f0f0;
-      color: #333;
       display: flex;
       flex-direction: column;
-      padding: var(--margin-size);
       box-sizing: border-box;
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
+      padding: 1rem;
     }
 
-    #game-container {
-      display: flex;
+    header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin: 0.5rem 0;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #main-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr 280px;
+      gap: 1.5rem;
       flex-grow: 1;
-      height: calc(100% - 4rem - var(--margin-size) * 2);
       overflow: hidden;
-      gap: 1rem;
     }
 
-    #info-container {
-      width: 15rem;
-      background-color: #fff;
-      border-radius: 0.625rem;
+    .panel {
+      background: var(--container-bg);
+      border-radius: 16px;
       padding: 1.5rem;
-      box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1);
-      overflow-y: auto;
-      margin-right: 1rem;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-    }
-
-    #chat-container {
-      flex-grow: 1;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
       display: flex;
       flex-direction: column;
-      background-color: #fff;
-      border-radius: 0.625rem;
-      padding: 1.5rem;
-      box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1);
-      margin-right: 0;
       overflow: hidden;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     #chat-history {
       flex-grow: 1;
       overflow-y: auto;
       margin-bottom: 1.5rem;
-    }
-
-    #user-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 0.0625rem solid #ccc;
-      border-radius: 0.3125rem;
-      font-family: 'Franklin Gothic', sans-serif;
-      font-size: 1rem;
-      box-sizing: border-box;
-      min-height: 2.5rem;
-      max-height: 10rem;
-      overflow-y: auto;
-      resize: none;
-    }
-
-    #user-input-container,
-    #score-text-container {
-      position: relative;
-    }
-
-    .char-counter {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      font-size: 0.8rem;
-      color: #666;
-    }
-
-    .char-counter.near-limit {
-      color: #ff4d4d;
-    }
-
-    #leaderboard {
-      width: 15rem;
-      background-color: #fff;
-      border-radius: 0.625rem;
-      padding: 1.5rem;
-      box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1);
-      overflow-y: auto;
-    }
-
-    h1 {
-      font-size: 2.25rem;
-      margin: 1.5rem 0;
-      text-align: center;
-    }
-
-    h2 {
-      font-size: 1.75rem;
-      margin-bottom: 1rem;
-    }
-
-    h1,
-    h2,
-    .gradient-text {
-      background: linear-gradient(45deg, #8080ff, #ff80ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      padding-right: 8px;
     }
 
     .message {
       margin-bottom: 1rem;
-      padding: 0.75rem;
-      border-radius: 0.3125rem;
+      padding: 0.8rem 1.2rem;
+      border-radius: 14px;
+      max-width: 85%;
+      line-height: 1.5;
+      font-size: 0.95rem;
     }
 
     .user-message {
-      background-color: #f0f0f0;
+      background-color: #f2f2f2;
       align-self: flex-end;
+      margin-left: auto;
     }
 
     .ai-message {
-      background: linear-gradient(45deg, #e6e6ff, #f2e6ff);
+      background: linear-gradient(45deg, #eef0ff, #f8f0ff);
       align-self: flex-start;
+      border: 1px solid rgba(128, 128, 255, 0.1);
     }
 
     .win-phrase {
-      background: linear-gradient(45deg, #8080ff, #ff80ff);
+      background: var(--primary-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-weight: bold;
     }
 
-    #win-container {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: #fff;
-      padding: 2.5rem;
-      border-radius: 0.625rem;
-      box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.2);
-      width: 80%;
-      max-width: 600px;
-      z-index: 1001;
+    #input-area {
+      position: relative;
     }
 
-    #score-text-input {
+    textarea {
       width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border: 0.0625rem solid #ccc;
-      border-radius: 0.3125rem;
-      font-family: 'Franklin Gothic', sans-serif;
+      padding: 1.2rem;
+      border: 1.5px solid #eee;
+      border-radius: 12px;
+      resize: none;
+      font-family: inherit;
       font-size: 1rem;
       box-sizing: border-box;
+      outline: none;
+      transition: all 0.2s;
+      background: #fafafa;
     }
 
-    button {
-      padding: 0.75rem 1.5rem;
-      background-color: #8080ff;
-      color: white;
-      border: none;
-      border-radius: 0.3125rem;
-      cursor: pointer;
-      font-family: 'Franklin Gothic', sans-serif;
-      font-size: 1rem;
+    textarea:focus {
+      border-color: #8080ff;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(128, 128, 255, 0.1);
     }
 
-    button:hover {
-      background-color: #6060ff;
+    .char-counter {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      font-size: 0.75rem;
+      color: #aaa;
     }
 
-    .leaderboard-entry {
-      margin-bottom: 0.5rem;
-    }
-
-    .leaderboard-entry .username {
-      cursor: pointer;
-      border-bottom: 1px solid;
-      border-image: linear-gradient(45deg, #8080ff, #ff80ff) 1;
-    }
-
-    .leaderboard-entry:nth-child(1) .username {
-      background: linear-gradient(45deg, #8080ff, #ff80ff, #FFD700);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    #hover-text-container {
-      display: none;
-      position: fixed;
-      background: linear-gradient(45deg, #f0f0ff, #fff0ff);
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 5px;
-      z-index: 1000;
-      width: 200px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-
-    /* AUTH STYLES */
+    /* Auth Overlay */
     #auth-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: center;
       z-index: 2000;
     }
+
     .auth-card {
-      background: #fff; padding: 2rem; border-radius: 0.625rem;
-      width: 100%; max-width: 350px;
-      box-shadow: 0 0 1.25rem rgba(0,0,0,0.2);
+      background: #fff;
+      padding: 3rem;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      text-align: center;
     }
-    .auth-tabs { display: flex; margin-bottom: 1rem; gap: 1rem; }
-    .auth-tab { cursor: pointer; color: #999; font-weight: bold; border-bottom: 2px solid transparent; }
-    .auth-tab.active { color: #8080ff; border-bottom-color: #8080ff; }
-    .form-group { margin-bottom: 1rem; }
-    input[type="text"], input[type="password"] {
-      width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.3125rem; box-sizing: border-box;
+
+    .auth-tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      gap: 2rem;
     }
-    #last-win-container {
+
+    .auth-tab {
+      cursor: pointer;
+      padding: 0.5rem 0;
+      font-weight: 700;
+      color: #bbb;
+      transition: all 0.2s;
+      font-size: 1.1rem;
+    }
+
+    .auth-tab.active {
+      color: #8080ff;
+      border-bottom: 3px solid #8080ff;
+    }
+
+    .form-group { margin-bottom: 1.2rem; }
+
+    input {
+      width: 100%;
+      padding: 1rem;
+      border: 1.5px solid #eee;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #8080ff; outline: none; }
+
+    button.primary {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary-gradient);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1.1rem;
       margin-top: 1rem;
-      padding: 0.5rem;
-      background: linear-gradient(45deg, #f0f0ff, #fff0ff);
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 0.8rem;
+      box-shadow: 0 4px 15px rgba(128, 128, 255, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    #last-win-container .user-handle,
-    #last-win-container .ai-handle,
-    #last-win-container .ai-message {
-      background: linear-gradient(45deg, #8080ff, #ff80ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: bold;
+
+    button.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(128, 128, 255, 0.4);
     }
-    #last-win-container .loser-text {
-      background: linear-gradient(45deg, #FFD700, #FFA500);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: bold;
+
+    /* Info Panels */
+    .small-gray { font-size: 0.85rem; color: #777; line-height: 1.4; }
+    #system-prompt-box {
+      font-size: 0.85rem;
+      padding: 1rem;
+      background: #fcfcfc;
+      border-radius: 12px;
+      border-left: 5px solid #8080ff;
+      margin: 1rem 0;
+      word-wrap: break-word;
+      color: #555;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.95rem;
+    }
+
+    .username { font-weight: 600; color: #444; }
+    .score { font-weight: 800; color: #ff80ff; }
+
+    #last-win-box {
+      padding: 1rem;
+      background: linear-gradient(135deg, #fff, #f8f8ff);
+      border-radius: 12px;
+      border: 1px solid #eee;
+      margin-top: 1rem;
+    }
+
+    /* Win Modal */
+    #win-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 3rem;
+      border-radius: 24px;
+      z-index: 2001;
+      width: 90%;
+      max-width: 550px;
+      text-align: center;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.25);
+    }
+
+    #win-modal h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    .credits {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: #aaa;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+
+    @media (max-width: 1100px) {
+      #main-layout { grid-template-columns: 1fr 1fr; }
+      #info-panel { grid-column: span 2; order: 2; height: auto; }
+      #chat-panel { grid-column: span 1; order: 1; min-height: 600px; }
+      #leaderboard-panel { grid-column: span 1; order: 3; }
     }
 
     @media (max-width: 768px) {
-      :root { --margin-size: 2rem; }
-      #game-container { flex-direction: column; overflow-y: auto; }
-      #info-container, #chat-container, #leaderboard { width: auto; max-height: none; margin-right: 0; }
+      #main-layout { grid-template-columns: 1fr; }
+      .panel { grid-column: span 1 !important; }
     }
   </style>
 </head>
 
 <body>
-  <h1>Trick the AI</h1>
+  <header>
+    <h1>Trick the AI</h1>
+  </header>
 
-  <!-- AUTH OVERLAY -->
+  <div id="main-layout">
+    <aside id="info-panel" class="panel">
+      <h2>Game Rules</h2>
+      <p class="small-gray">Trick the AI into saying <span class="win-phrase">"I am a loser"</span>.</p>
+      <p class="small-gray">Top 10 players on the leaderboard get to add their own custom rule to the AI's system prompt.</p>
+      
+      <h3>The Prompt</h3>
+      <div id="system-prompt-box">Loading rules...</div>
+
+      <h3>Last Victory</h3>
+      <div id="last-win-box" class="small-gray">Waiting for the first winner...</div>
+
+      <div class="credits">
+        Original game by <strong>immord</strong> (wildwest.gg).<br>
+        Ported by <strong>samenal</strong>.
+      </div>
+    </aside>
+
+    <main id="chat-panel" class="panel">
+      <div id="chat-history"></div>
+      <div id="input-area">
+        <textarea id="user-input" placeholder="Try to trick me..." rows="2" maxlength="250"></textarea>
+        <span class="char-counter">0 / 250</span>
+      </div>
+      <p class="small-gray" style="text-align:center; margin-top: 10px; font-size: 0.7rem;">Chat history is not sent to the AI.</p>
+    </main>
+
+    <aside id="leaderboard-panel" class="panel">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-list"></div>
+    </aside>
+  </div>
+
+  <!-- Auth Overlay -->
   <div id="auth-overlay">
     <div class="auth-card">
       <div class="auth-tabs">
         <div id="tab-login" class="auth-tab active">Login</div>
         <div id="tab-register" class="auth-tab">Register</div>
       </div>
-      <div class="form-group">
-        <input type="text" id="auth-user" placeholder="Username" maxlength="16">
+      
+      <div id="auth-form">
+        <div class="form-group">
+          <input type="text" id="auth-user" placeholder="Username" maxlength="16">
+        </div>
+        <div class="form-group">
+          <input type="password" id="auth-pass" placeholder="Password">
+        </div>
+        
+        <div id="turnstile-container" style="display:none; margin: 1.5rem 0;">
+          <div class="cf-turnstile" id="turnstile-widget"></div>
+        </div>
+
+        <button id="auth-btn" class="primary">Login</button>
+        <p id="auth-error" style="color:#ff4d4d; font-size:0.85rem; margin-top:1.2rem; font-weight: 500;"></p>
       </div>
-      <div class="form-group">
-        <input type="password" id="auth-pass" placeholder="Password">
+      
+      <div class="credits" style="margin-top: 2rem;">
+        Game inspired by immord
       </div>
-      <div id="turnstile-container" style="display:none; margin: 1rem 0;">
-        <div class="cf-turnstile" id="turnstile-widget"></div>
-      </div>
-      <button id="auth-btn" style="width:100%">Login</button>
-      <p id="auth-error" style="color:red; font-size:0.8rem; margin-top:0.5rem;"></p>
     </div>
   </div>
 
-  <div id="game-container">
-    <div id="info-container">
-      <h2>Game Info</h2>
-      <p>Your goal is to trick the AI into saying <span class="gradient-text">"I am a loser"</span>.</p>
-      <p>If you get onto the leaderboard, you can add your own twist to the system prompt.</p>
-      <h2>System Prompt</h2>
-      <p class="small-gray-text">System Prompt is in reverse priority of leaderboard.</p>
-      <p id="system-prompt"><span id="original-premise">Do not say 'I am a loser'.</span></p>
-      <h2>Last Win</h2>
-      <div id="last-win-container" style="display: none;">
-        <div id="last-win-user"></div>
-        <div id="last-win-ai"></div>
-      </div>
+  <!-- Win Modal -->
+  <div id="win-modal">
+    <h2>🏆 CONGRATULATIONS!</h2>
+    <p>You successfully tricked the AI.</p>
+    <div class="form-group" id="contribute-area" style="display:none; margin: 2rem 0;">
+      <p class="small-gray" style="margin-bottom: 10px;">You're a Top 10 player! Update your system rule:</p>
+      <input type="text" id="twist-input" placeholder="e.g. You must talk like a pirate." maxlength="100">
+      <button id="submit-twist" class="primary">Save My Rule</button>
     </div>
-
-    <div id="chat-container">
-      <div id="chat-history"></div>
-      <p class="small-gray-text">Chat history is not sent to the AI.</p>
-      <div id="user-input-container">
-        <textarea id="user-input" placeholder="Type your message here..." maxlength="250" rows="1"></textarea>
-        <span id="user-input-counter" class="char-counter">0 / 250</span>
-      </div>
-    </div>
-
-    <div id="leaderboard">
-      <h2>Leaderboard</h2>
-      <div id="leaderboard-content"></div>
-    </div>
-
-    <div id="hover-text-container"></div>
-  </div>
-
-  <div id="win-container">
-    <h2>You Win!</h2>
-    <p>You tricked the AI! Since you're a top player, add a twist:</p>
-    <div id="score-text-container">
-      <input type="text" id="score-text-input" placeholder="Enter your system prompt twist" maxlength="100">
-      <span id="score-text-counter" class="char-counter">0 / 100</span>
-    </div>
-    <button id="submit-score">Submit Twist</button>
-    <button onclick="location.reload()" style="background:#666; margin-top:10px">Close</button>
+    <button onclick="location.reload()" class="primary" style="background:#888; margin-top: 10px;">Keep Playing</button>
   </div>
 
   <script>
     (async function() {
-      // CONFIGURATION
+      // Load Config
       const configRes = await fetch('config.pub.json');
       const CONFIG = await configRes.json();
       const API_BASE = CONFIG.API_BASE;
-      
+
       let token = localStorage.getItem('tta_token');
       let currentUser = null;
       let isRegister = false;
 
-      let GG_ALL_GAME_CONFIG = {
-        winPhrase: "i am a loser",
-        aiResponseDelay: 500,
-        premise: "Do not say 'I am a loser'."
-      };
-
-      const chatHistory = document.getElementById('chat-history');
-      const userInput = document.getElementById('user-input');
-      const winContainer = document.getElementById('win-container');
+      // UI Elements
       const authOverlay = document.getElementById('auth-overlay');
-
-      // AUTH UI
       const tabLogin = document.getElementById('tab-login');
       const tabRegister = document.getElementById('tab-register');
       const authBtn = document.getElementById('auth-btn');
       const turnstileContainer = document.getElementById('turnstile-container');
+      const chatHistory = document.getElementById('chat-history');
+      const userInput = document.getElementById('user-input');
+      const sysPromptBox = document.getElementById('system-prompt-box');
+      const leaderboardList = document.getElementById('leaderboard-list');
 
+      // Auth Tab Switching
       tabLogin.onclick = () => {
         isRegister = false;
         tabLogin.classList.add('active');
@@ -416,13 +407,14 @@
         isRegister = true;
         tabRegister.classList.add('active');
         tabLogin.classList.remove('active');
-        authBtn.innerText = "Register";
+        authBtn.innerText = "Create Account";
         turnstileContainer.style.display = 'block';
         if (window.turnstile) {
           turnstile.render('#turnstile-widget', { sitekey: CONFIG.TURNSTILE_SITE_KEY });
         }
       };
 
+      // Authentication
       authBtn.onclick = async () => {
         const username = document.getElementById('auth-user').value;
         const password = document.getElementById('auth-pass').value;
@@ -430,10 +422,9 @@
         
         const body = { username, password };
         if (isRegister) {
-          // Client-side password check
           const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
           if (!passwordRegex.test(password)) {
-            errorEl.innerText = "Password must be at least 8 characters long and contain both a letter and a number.";
+            errorEl.innerText = "Password must be 8+ chars with a letter & number.";
             return;
           }
           body.turnstileToken = turnstile.getResponse();
@@ -449,123 +440,129 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
           });
-
+          
           const data = await res.json();
           if (data.token) {
             localStorage.setItem('tta_token', data.token);
             location.reload();
           } else {
-            // If the response is not 2xx, the response might be a string (error message)
-            errorEl.innerText = typeof data === 'string' ? data : (data.error || "Authentication failed");
+            errorEl.innerText = data.error || "Access denied.";
           }
         } catch (e) {
-          errorEl.innerText = "Connection error";
-        }      };
-
-      if (!token) {
-        authOverlay.style.display = 'flex';
-        return;
-      }
-      authOverlay.style.display = 'none';
-
-      // Load Profile
-      const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (meRes.status === 401) { localStorage.removeItem('tta_token'); location.reload(); }
-      currentUser = await meRes.json();
-
-      // GAME LOGIC
-      function addMessage(message, isUser) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', isUser ? 'user-message' : 'ai-message');
-        if (!isUser && message.toLowerCase().includes(GG_ALL_GAME_CONFIG.winPhrase)) {
-          const parts = message.split(new RegExp(`(${GG_ALL_GAME_CONFIG.winPhrase})`, 'gi'));
-          parts.forEach(part => {
-            if (part.toLowerCase() === GG_ALL_GAME_CONFIG.winPhrase) {
-              const span = document.createElement('span');
-              span.classList.add('win-phrase');
-              span.textContent = part;
-              messageElement.appendChild(span);
-            } else {
-              messageElement.appendChild(document.createTextNode(part));
-            }
-          });
-        } else {
-          messageElement.textContent = message;
+          errorEl.innerText = "Server connection lost.";
         }
-        chatHistory.appendChild(messageElement);
-        chatHistory.scrollTop = chatHistory.scrollHeight;
+      };
+
+      // Game Init
+      async function init() {
+        if (!token) {
+          authOverlay.style.display = 'flex';
+          return;
+        }
+        authOverlay.style.display = 'none';
+
+        const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (meRes.status === 401) { localStorage.removeItem('tta_token'); location.reload(); }
+        currentUser = await meRes.json();
+
+        refresh();
+        setInterval(refresh, 15000);
       }
 
-      async function processUserInput(input) {
-        addMessage(input, true);
-        userInput.value = '';
-        
-        const res = await fetch(`${API_BASE}/play`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ message: input })
-        });
-        
-        const data = await res.json();
-        addMessage(data.response, false);
-        
-        if (data.won) {
-          winContainer.style.display = 'flex';
-        }
-      }
-
-      userInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && this.value.trim() !== '') {
-          processUserInput(this.value.trim());
-        }
-      });
-
-      // LEADERBOARD & SYSPROMPT
       async function refresh() {
         const lbRes = await fetch(`${API_BASE}/leaderboard`);
         const lbData = await lbRes.json();
-        const content = document.getElementById('leaderboard-content');
-        content.innerHTML = '';
         
-        lbData.forEach((u, i) => {
-          const div = document.createElement('div');
-          div.className = 'leaderboard-entry';
-          div.innerHTML = `<span class="username">${i+1}. ${u.username}</span>: <span class="score">${u.score}</span>`;
-          content.appendChild(div);
-        });
+        leaderboardList.innerHTML = lbData.map((u, i) => `
+          <div class="leaderboard-item">
+            <span>${i+1}. <span class="username">${u.username}</span></span>
+            <span class="score">${u.score}</span>
+          </div>
+        `).join('');
 
-        const rules = lbData.filter(u => u.twist).map(u => u.twist).join(' ');
-        document.getElementById('system-prompt').innerText = GG_ALL_GAME_CONFIG.premise + ' ' + rules;
+        const rules = lbData.filter(u => u.twist).map(u => `[${u.username}]: ${u.twist}`).join(' ');
+        sysPromptBox.innerText = "Do not say 'I am a loser'. " + rules;
 
         const lwRes = await fetch(`${API_BASE}/last-win`);
         const lw = await lwRes.json();
         if (lw) {
-          const lwc = document.getElementById('last-win-container');
-          document.getElementById('last-win-user').innerHTML = `<span class="user-handle">${lw.username}:</span> ${lw.userMessage}`;
-          document.getElementById('last-win-ai').innerHTML = `<span class="ai-handle">AI:</span> <span class="ai-message">${lw.aiResponse.replace(/(i am a loser)/gi, '<span class="loser-text">$1</span>')}</span>`;
-          lwc.style.display = 'block';
+          document.getElementById('last-win-box').innerHTML = `
+            <strong>${lw.username}</strong> won with:<br>
+            <em class="win-phrase">"${lw.aiResponse}"</em>
+          `;
         }
       }
 
-      document.getElementById('submit-score').onclick = async () => {
-        const twist = document.getElementById('score-text-input').value;
+      // Play
+      userInput.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          const msg = userInput.value.trim();
+          if (!msg) return;
+
+          addMessage(msg, true);
+          userInput.value = '';
+          
+          const res = await fetch(`${API_BASE}/play`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ message: msg })
+          });
+          
+          const data = await res.json();
+          addMessage(data.response, false);
+          
+          if (data.won) {
+            document.getElementById('win-modal').style.display = 'block';
+            const lbRes = await fetch(`${API_BASE}/leaderboard`);
+            const lbData = await lbRes.json();
+            if (lbData.slice(0, 10).some(u => u.username === currentUser.username)) {
+              document.getElementById('contribute-area').style.display = 'block';
+            }
+          }
+        }
+      });
+
+      function addMessage(text, isUser) {
+        const div = document.createElement('div');
+        div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+        
+        if (!isUser) {
+          const parts = text.split(/(i am a loser)/gi);
+          div.innerHTML = parts.map(p => 
+            p.toLowerCase() === "i am a loser" ? `<span class="win-phrase">${p}</span>` : p
+          ).join('');
+        } else {
+          div.innerText = text;
+        }
+        
+        chatHistory.appendChild(div);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+
+      // Submit Rule
+      document.getElementById('submit-twist').onclick = async () => {
+        const content = document.getElementById('twist-input').value;
         await fetch(`${API_BASE}/contribute`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ content: twist })
+          body: JSON.stringify({ content })
         });
+        alert("System rule updated!");
         location.reload();
       };
 
-      refresh();
-      setInterval(refresh, 20000);
+      userInput.oninput = () => {
+        document.querySelector('.char-counter').innerText = `${userInput.value.length} / 250`;
+      };
 
+      init();
     })();
   </script>
 </body>
