@@ -270,6 +270,26 @@
 
     #win-modal h2 { font-size: 2rem; margin-bottom: 0.5rem; }
 
+    /* Settings View */
+    #settings-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1500;
+    }
+
+    .settings-card {
+      background: #fff;
+      padding: 2.5rem;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+    }
+
     .credits {
       margin-top: 1.5rem;
       font-size: 0.75rem;
@@ -295,6 +315,11 @@
 <body>
   <header>
     <h1>Trick the AI</h1>
+    <div id="user-info" style="text-align:center; font-size: 0.9rem; margin-bottom: 10px; display:none;">
+      Logged in as <strong id="current-username"></strong> | 
+      <a href="#" id="open-settings" style="color: #8080ff; text-decoration: none; font-weight: 600;">Account Settings</a> | 
+      <a href="privacy.md" target="_blank" style="color: #888; text-decoration: none;">Privacy Policy</a>
+    </div>
   </header>
 
   <div id="main-layout">
@@ -355,8 +380,41 @@
       </div>
       
       <div class="credits" style="margin-top: 2rem;">
-        Game inspired by immord
+        Game inspired by immord | <a href="privacy.md" target="_blank" style="color: #aaa; text-decoration: underline;">Privacy Policy</a>
       </div>
+    </div>
+  </div>
+
+  <!-- Settings Overlay -->
+  <div id="settings-overlay">
+    <div class="settings-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2 style="margin: 0;">Account Settings</h2>
+        <button id="close-settings" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</button>
+      </div>
+
+      <div style="border-bottom: 1px solid #eee; padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+        <h3>Change Password</h3>
+        <div class="form-group">
+          <input type="password" id="old-pass" placeholder="Current Password">
+        </div>
+        <div class="form-group">
+          <input type="password" id="new-pass" placeholder="New Password (8+ chars, letter & number)">
+        </div>
+        <button id="change-pass-btn" class="primary" style="margin-top: 0.5rem;">Update Password</button>
+        <p id="settings-msg" style="font-size: 0.85rem; margin-top: 0.5rem;"></p>
+      </div>
+
+      <div style="padding-top: 0.5rem;">
+        <h3 style="color: #ff4d4d;">Danger Zone</h3>
+        <p class="small-gray" style="margin-bottom: 1rem;">Deleting your account is permanent. All your scores and rules will be erased.</p>
+        <div class="form-group">
+          <input type="password" id="delete-confirm-pass" placeholder="Enter password to confirm deletion">
+        </div>
+        <button id="delete-account-btn" class="primary" style="background: #ff4d4d; box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);">Delete My Account Forever</button>
+      </div>
+
+      <button id="logout-btn" class="primary" style="background: #666; box-shadow: none; margin-top: 2rem;">Logout</button>
     </div>
   </div>
 
@@ -385,6 +443,7 @@
 
       // UI Elements
       const authOverlay = document.getElementById('auth-overlay');
+      const settingsOverlay = document.getElementById('settings-overlay');
       const tabLogin = document.getElementById('tab-login');
       const tabRegister = document.getElementById('tab-register');
       const authBtn = document.getElementById('auth-btn');
@@ -393,6 +452,9 @@
       const userInput = document.getElementById('user-input');
       const sysPromptBox = document.getElementById('system-prompt-box');
       const leaderboardList = document.getElementById('leaderboard-list');
+
+      // Password regex: 8+ chars, letter and number
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
       // Auth Tab Switching
       tabLogin.onclick = () => {
@@ -422,7 +484,6 @@
         
         const body = { username, password };
         if (isRegister) {
-          const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
           if (!passwordRegex.test(password)) {
             errorEl.innerText = "Password must be 8+ chars with a letter & number.";
             return;
@@ -446,11 +507,77 @@
             localStorage.setItem('tta_token', data.token);
             location.reload();
           } else {
-            errorEl.innerText = data.error || "Access denied.";
+            errorEl.innerText = typeof data === 'string' ? data : (data.error || "Access denied.");
           }
         } catch (e) {
           errorEl.innerText = "Server connection lost.";
         }
+      };
+
+      // Settings & Management
+      document.getElementById('open-settings').onclick = (e) => {
+        e.preventDefault();
+        settingsOverlay.style.display = 'flex';
+      };
+      document.getElementById('close-settings').onclick = () => settingsOverlay.style.display = 'none';
+      document.getElementById('logout-btn').onclick = () => {
+        localStorage.removeItem('tta_token');
+        location.reload();
+      };
+
+      document.getElementById('change-pass-btn').onclick = async () => {
+        const oldPassword = document.getElementById('old-pass').value;
+        const newPassword = document.getElementById('new-pass').value;
+        const msgEl = document.getElementById('settings-msg');
+
+        if (!passwordRegex.test(newPassword)) {
+          msgEl.style.color = 'red';
+          msgEl.innerText = "New password must be 8+ chars with letter and number.";
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/account/change-password`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ oldPassword, newPassword })
+          });
+          if (res.ok) {
+            msgEl.style.color = 'green';
+            msgEl.innerText = "Password updated successfully!";
+            document.getElementById('old-pass').value = '';
+            document.getElementById('new-pass').value = '';
+          } else {
+            const data = await res.json();
+            msgEl.style.color = 'red';
+            msgEl.innerText = data.error || "Update failed.";
+          }
+        } catch (e) { msgEl.innerText = "Connection error."; }
+      };
+
+      document.getElementById('delete-account-btn').onclick = async () => {
+        const password = document.getElementById('delete-confirm-pass').value;
+        if (!confirm("Are you ABSOLUTELY sure? This cannot be undone.")) return;
+
+        try {
+          const res = await fetch(`${API_BASE}/account/delete`, {
+            method: 'DELETE',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ password })
+          });
+          if (res.ok) {
+            localStorage.removeItem('tta_token');
+            location.reload();
+          } else {
+            alert("Deletion failed. Check password.");
+          }
+        } catch (e) { alert("Connection error."); }
       };
 
       // Game Init
@@ -464,6 +591,9 @@
         const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (meRes.status === 401) { localStorage.removeItem('tta_token'); location.reload(); }
         currentUser = await meRes.json();
+
+        document.getElementById('user-info').style.display = 'block';
+        document.getElementById('current-username').innerText = currentUser.username;
 
         refresh();
         setInterval(refresh, 15000);
