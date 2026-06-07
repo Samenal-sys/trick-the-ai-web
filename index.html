@@ -169,21 +169,26 @@
       display: flex;
       justify-content: center;
       margin-bottom: 2rem;
-      gap: 2rem;
+      gap: 1.5rem;
+      border-bottom: 1px solid #eee;
     }
 
     .auth-tab {
       cursor: pointer;
-      padding: 0.5rem 0;
+      padding: 0.8rem 1rem;
       font-weight: 700;
       color: #bbb;
       transition: all 0.2s;
       font-size: 1.1rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
     }
 
     .auth-tab.active {
       color: #8080ff;
-      border-bottom: 3px solid #8080ff;
+      border-bottom-color: #8080ff;
     }
 
     .form-group { margin-bottom: 1.2rem; }
