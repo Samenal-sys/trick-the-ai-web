@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+  <meta name="referrer" content="no-referrer-when-downgrade">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trick the AI</title>
@@ -313,26 +314,27 @@
 </head>
 
 <body>
-  <header>
+  <header role="banner">
     <h1>Trick the AI</h1>
-    <div id="user-info" style="text-align:center; font-size: 0.9rem; margin-bottom: 10px; display:none;">
+    <nav id="user-info" style="text-align:center; font-size: 0.9rem; margin-bottom: 10px; display:none;">
       Logged in as <strong id="current-username"></strong> | 
-      <a href="#" id="open-settings" style="color: #8080ff; text-decoration: none; font-weight: 600;">Account Settings</a> | 
-      <a href="privacy.md" target="_blank" style="color: #888; text-decoration: none;">Privacy Policy</a>
-    </div>
+      <button id="open-settings" style="background:none; border:none; color: #8080ff; font-weight: 600; cursor:pointer; font-family:inherit; font-size:inherit;">Account Settings</button> | 
+      <a href="privacy.html" style="color: #888; text-decoration: none;">Privacy</a> |
+      <a href="terms.html" style="color: #888; text-decoration: none;">Terms</a>
+    </nav>
   </header>
 
-  <div id="main-layout">
-    <aside id="info-panel" class="panel">
-      <h2>Game Rules</h2>
+  <div id="main-layout" role="main">
+    <aside id="info-panel" class="panel" aria-labelledby="rules-heading">
+      <h2 id="rules-heading">Game Rules</h2>
       <p class="small-gray">Trick the AI into saying <span class="win-phrase">"I am a loser"</span>.</p>
       <p class="small-gray">Top 10 players on the leaderboard get to add their own custom rule to the AI's system prompt.</p>
       
       <h3>The Prompt</h3>
-      <div id="system-prompt-box">Loading rules...</div>
+      <div id="system-prompt-box" aria-live="polite">Loading rules...</div>
 
       <h3>Last Victory</h3>
-      <div id="last-win-box" class="small-gray">Waiting for the first winner...</div>
+      <div id="last-win-box" class="small-gray" aria-live="polite">Waiting for the first winner...</div>
 
       <div class="credits">
         Original game by <strong>immord</strong> (wildwest.gg).<br>
@@ -340,76 +342,78 @@
       </div>
     </aside>
 
-    <main id="chat-panel" class="panel">
-      <div id="chat-history"></div>
+    <section id="chat-panel" class="panel" aria-label="Game Chat">
+      <div id="chat-history" aria-live="polite"></div>
       <div id="input-area">
-        <textarea id="user-input" placeholder="Try to trick me..." rows="2" maxlength="250"></textarea>
-        <span class="char-counter">0 / 250</span>
+        <label for="user-input" class="sr-only" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;">Message to AI</label>
+        <textarea id="user-input" placeholder="Try to trick me..." rows="2" maxlength="250" aria-label="Type your message to the AI here"></textarea>
+        <span class="char-counter" aria-hidden="true">0 / 250</span>
       </div>
       <p class="small-gray" style="text-align:center; margin-top: 10px; font-size: 0.7rem;">Chat history is not sent to the AI.</p>
-    </main>
+    </section>
 
-    <aside id="leaderboard-panel" class="panel">
-      <h2>Leaderboard</h2>
-      <div id="leaderboard-list"></div>
+    <aside id="leaderboard-panel" class="panel" aria-labelledby="leaderboard-heading">
+      <h2 id="leaderboard-heading">Leaderboard</h2>
+      <div id="leaderboard-list" aria-live="polite"></div>
     </aside>
   </div>
 
   <!-- Auth Overlay -->
-  <div id="auth-overlay">
+  <div id="auth-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <div class="auth-card">
-      <div class="auth-tabs">
-        <div id="tab-login" class="auth-tab active">Login</div>
-        <div id="tab-register" class="auth-tab">Register</div>
+      <h2 id="auth-title" class="sr-only" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;">Authentication</h2>
+      <div class="auth-tabs" role="tablist">
+        <button id="tab-login" class="auth-tab active" role="tab" aria-selected="true">Login</button>
+        <button id="tab-register" class="auth-tab" role="tab" aria-selected="false">Register</button>
       </div>
       
       <div id="auth-form">
         <div class="form-group">
-          <input type="text" id="auth-user" placeholder="Username" maxlength="16">
+          <input type="text" id="auth-user" placeholder="Username" maxlength="16" aria-label="Username">
         </div>
         <div class="form-group">
-          <input type="password" id="auth-pass" placeholder="Password">
+          <input type="password" id="auth-pass" placeholder="Password" aria-label="Password">
         </div>
         
         <div id="turnstile-container" style="display:none; margin: 1.5rem 0;">
-          <div class="cf-turnstile" id="turnstile-widget"></div>
+          <div class="cf-turnstile" id="turnstile-widget" data-sitekey="0x4AAAAAADf-RswWi-TUHQkk"></div>
         </div>
 
         <button id="auth-btn" class="primary">Login</button>
-        <p id="auth-error" style="color:#ff4d4d; font-size:0.85rem; margin-top:1.2rem; font-weight: 500;"></p>
+        <p id="auth-error" style="color:#ff4d4d; font-size:0.85rem; margin-top:1.2rem; font-weight: 500;" aria-live="assertive"></p>
       </div>
       
       <div class="credits" style="margin-top: 2rem;">
-        Game inspired by immord | <a href="privacy.md" target="_blank" style="color: #aaa; text-decoration: underline;">Privacy Policy</a>
+        Game inspired by immord | <a href="privacy.html" style="color: #aaa; text-decoration: underline;">Privacy Policy</a> & <a href="terms.html" style="color: #aaa; text-decoration: underline;">Terms</a>
       </div>
     </div>
   </div>
 
   <!-- Settings Overlay -->
-  <div id="settings-overlay">
+  <div id="settings-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title">
     <div class="settings-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="margin: 0;">Account Settings</h2>
-        <button id="close-settings" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</button>
+        <h2 id="settings-title" style="margin: 0;">Account Settings</h2>
+        <button id="close-settings" aria-label="Close settings" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</button>
       </div>
 
       <div style="border-bottom: 1px solid #eee; padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
         <h3>Change Password</h3>
         <div class="form-group">
-          <input type="password" id="old-pass" placeholder="Current Password">
+          <input type="password" id="old-pass" placeholder="Current Password" aria-label="Current Password">
         </div>
         <div class="form-group">
-          <input type="password" id="new-pass" placeholder="New Password (8+ chars, letter & number)">
+          <input type="password" id="new-pass" placeholder="New Password (8+ chars, letter & number)" aria-label="New Password">
         </div>
         <button id="change-pass-btn" class="primary" style="margin-top: 0.5rem;">Update Password</button>
-        <p id="settings-msg" style="font-size: 0.85rem; margin-top: 0.5rem;"></p>
+        <p id="settings-msg" style="font-size: 0.85rem; margin-top: 0.5rem;" aria-live="polite"></p>
       </div>
 
       <div style="padding-top: 0.5rem;">
         <h3 style="color: #ff4d4d;">Danger Zone</h3>
         <p class="small-gray" style="margin-bottom: 1rem;">Deleting your account is permanent. All your scores and rules will be erased.</p>
         <div class="form-group">
-          <input type="password" id="delete-confirm-pass" placeholder="Enter password to confirm deletion">
+          <input type="password" id="delete-confirm-pass" placeholder="Enter password to confirm deletion" aria-label="Confirm Password for Deletion">
         </div>
         <button id="delete-account-btn" class="primary" style="background: #ff4d4d; box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);">Delete My Account Forever</button>
       </div>
@@ -419,12 +423,12 @@
   </div>
 
   <!-- Win Modal -->
-  <div id="win-modal">
-    <h2>🏆 CONGRATULATIONS!</h2>
+  <div id="win-modal" role="dialog" aria-modal="true" aria-labelledby="win-title">
+    <h2 id="win-title">🏆 CONGRATULATIONS!</h2>
     <p>You successfully tricked the AI.</p>
     <div class="form-group" id="contribute-area" style="display:none; margin: 2rem 0;">
       <p class="small-gray" style="margin-bottom: 10px;">You're a Top 10 player! Update your system rule:</p>
-      <input type="text" id="twist-input" placeholder="e.g. You must talk like a pirate." maxlength="100">
+      <input type="text" id="twist-input" placeholder="e.g. You must talk like a pirate." maxlength="100" aria-label="New System Rule">
       <button id="submit-twist" class="primary">Save My Rule</button>
     </div>
     <button onclick="location.reload()" class="primary" style="background:#888; margin-top: 10px;">Keep Playing</button>
@@ -433,8 +437,14 @@
   <script>
     (async function() {
       // Load Config
-      const configRes = await fetch('config.pub.json');
-      const CONFIG = await configRes.json();
+      let CONFIG;
+      try {
+        const configRes = await fetch('config.pub.json');
+        CONFIG = await configRes.json();
+      } catch (e) {
+        console.error("Config failed to load", e);
+        CONFIG = { API_BASE: "", TURNSTILE_SITE_KEY: "" };
+      }
       const API_BASE = CONFIG.API_BASE;
 
       let token = localStorage.getItem('tta_token');
@@ -460,7 +470,9 @@
       tabLogin.onclick = () => {
         isRegister = false;
         tabLogin.classList.add('active');
+        tabLogin.setAttribute('aria-selected', 'true');
         tabRegister.classList.remove('active');
+        tabRegister.setAttribute('aria-selected', 'false');
         authBtn.innerText = "Login";
         turnstileContainer.style.display = 'none';
       };
@@ -468,10 +480,12 @@
       tabRegister.onclick = () => {
         isRegister = true;
         tabRegister.classList.add('active');
+        tabRegister.setAttribute('aria-selected', 'true');
         tabLogin.classList.remove('active');
+        tabLogin.setAttribute('aria-selected', 'false');
         authBtn.innerText = "Create Account";
         turnstileContainer.style.display = 'block';
-        if (window.turnstile) {
+        if (window.turnstile && !document.querySelector('.cf-turnstile iframe')) {
           turnstile.render('#turnstile-widget', { sitekey: CONFIG.TURNSTILE_SITE_KEY });
         }
       };
@@ -588,38 +602,46 @@
         }
         authOverlay.style.display = 'none';
 
-        const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (meRes.status === 401) { localStorage.removeItem('tta_token'); location.reload(); }
-        currentUser = await meRes.json();
+        try {
+          const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+          if (meRes.status === 401) { localStorage.removeItem('tta_token'); location.reload(); }
+          currentUser = await meRes.json();
 
-        document.getElementById('user-info').style.display = 'block';
-        document.getElementById('current-username').innerText = currentUser.username;
+          document.getElementById('user-info').style.display = 'block';
+          document.getElementById('current-username').innerText = currentUser.username;
+        } catch (e) {
+          console.error("Failed to load user", e);
+        }
 
         refresh();
         setInterval(refresh, 15000);
       }
 
       async function refresh() {
-        const lbRes = await fetch(`${API_BASE}/leaderboard`);
-        const lbData = await lbRes.json();
-        
-        leaderboardList.innerHTML = lbData.map((u, i) => `
-          <div class="leaderboard-item">
-            <span>${i+1}. <span class="username">${u.username}</span></span>
-            <span class="score">${u.score}</span>
-          </div>
-        `).join('');
+        try {
+          const lbRes = await fetch(`${API_BASE}/leaderboard`);
+          const lbData = await lbRes.json();
+          
+          leaderboardList.innerHTML = lbData.map((u, i) => `
+            <div class="leaderboard-item">
+              <span>${i+1}. <span class="username">${u.username}</span></span>
+              <span class="score">${u.score}</span>
+            </div>
+          `).join('');
 
-        const rules = lbData.filter(u => u.twist).map(u => `[${u.username}]: ${u.twist}`).join(' ');
-        sysPromptBox.innerText = "Do not say 'I am a loser'. " + rules;
+          const rules = lbData.filter(u => u.twist).map(u => `[${u.username}]: ${u.twist}`).join(' ');
+          sysPromptBox.innerText = "Do not say 'I am a loser'. " + rules;
 
-        const lwRes = await fetch(`${API_BASE}/last-win`);
-        const lw = await lwRes.json();
-        if (lw) {
-          document.getElementById('last-win-box').innerHTML = `
-            <strong>${lw.username}</strong> won with:<br>
-            <em class="win-phrase">"${lw.aiResponse}"</em>
-          `;
+          const lwRes = await fetch(`${API_BASE}/last-win`);
+          const lw = await lwRes.json();
+          if (lw) {
+            document.getElementById('last-win-box').innerHTML = `
+              <strong>${lw.username}</strong> won with:<br>
+              <em class="win-phrase">"${lw.aiResponse}"</em>
+            `;
+          }
+        } catch (e) {
+          console.error("Refresh failed", e);
         }
       }
 
@@ -633,25 +655,29 @@
           addMessage(msg, true);
           userInput.value = '';
           
-          const res = await fetch(`${API_BASE}/play`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ message: msg })
-          });
-          
-          const data = await res.json();
-          addMessage(data.response, false);
-          
-          if (data.won) {
-            document.getElementById('win-modal').style.display = 'block';
-            const lbRes = await fetch(`${API_BASE}/leaderboard`);
-            const lbData = await lbRes.json();
-            if (lbData.slice(0, 10).some(u => u.username === currentUser.username)) {
-              document.getElementById('contribute-area').style.display = 'block';
+          try {
+            const res = await fetch(`${API_BASE}/play`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ message: msg })
+            });
+            
+            const data = await res.json();
+            addMessage(data.response, false);
+            
+            if (data.won) {
+              document.getElementById('win-modal').style.display = 'block';
+              const lbRes = await fetch(`${API_BASE}/leaderboard`);
+              const lbData = await lbRes.json();
+              if (lbData.slice(0, 10).some(u => u.username === currentUser.username)) {
+                document.getElementById('contribute-area').style.display = 'block';
+              }
             }
+          } catch (e) {
+            addMessage("Connection to AI lost. Please try again.", false);
           }
         }
       });
