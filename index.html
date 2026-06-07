@@ -50,6 +50,34 @@
       -webkit-text-fill-color: transparent;
     }
 
+    /* Mobile Nav (Hidden on Desktop) */
+    #mobile-nav {
+      display: none;
+      background: #fff;
+      padding: 0.5rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      gap: 0.5rem;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #aaa;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-btn.active {
+      color: #8080ff;
+      background: rgba(128, 128, 255, 0.1);
+    }
+
     #main-layout {
       display: grid;
       grid-template-columns: 280px 1fr 280px;
@@ -161,7 +189,7 @@
       background: #fff;
       padding: 3rem;
       border-radius: 24px;
-      width: 100%;
+      width: 90%;
       max-width: 400px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.1);
       text-align: center;
@@ -220,22 +248,24 @@
       cursor: help;
     }
 
+    /* Fixed Tooltip Positioning (Moved to the LEFT of the leaderboard) */
     .leaderboard-item:hover::after {
       content: attr(data-twist);
       position: absolute;
-      left: 100%;
+      right: 100%; /* Position to the left of the item */
       top: 0;
-      width: 200px;
+      width: 220px;
       background: #fff;
       padding: 1rem;
       border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
       z-index: 100;
-      margin-left: 10px;
+      margin-right: 15px; /* Space between item and tooltip */
       font-size: 0.85rem;
       color: #666;
-      border-left: 4px solid #ff80ff;
+      border-right: 4px solid #ff80ff; /* Border on the right side of tooltip */
       white-space: pre-wrap;
+      pointer-events: none;
     }
 
     .username { font-weight: 600; color: #444; }
@@ -301,20 +331,59 @@
       #info-panel { grid-column: span 2; order: 2; height: auto; }
       #chat-panel { grid-column: span 1; order: 1; min-height: 600px; }
       #leaderboard-panel { grid-column: span 1; order: 3; }
+      
       .leaderboard-item:hover::after {
-        left: auto;
         right: 100%;
-        margin-left: 0;
         margin-right: 10px;
       }
     }
 
+    /* AMAZING MOBILE REDESIGN */
     @media (max-width: 768px) {
-      #main-layout { grid-template-columns: 1fr; }
-      .panel { grid-column: span 1 !important; }
-      .leaderboard-item:hover::after {
-        display: none;
+      body { padding: 0.5rem; }
+      h1 { font-size: 1.8rem; margin: 0.2rem 0; }
+      
+      #mobile-nav { display: flex; }
+      
+      #main-layout { 
+        grid-template-columns: 1fr; 
+        display: block; /* Disable grid for easier pane switching */
+        height: calc(100vh - 140px); /* Adjust based on header/nav */
       }
+
+      .panel { 
+        display: none; /* Hide all by default */
+        height: 100%;
+        padding: 1.2rem;
+        box-shadow: none;
+        border-radius: 0;
+        background: transparent;
+      }
+
+      .panel.active-mobile { 
+        display: flex; 
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      }
+
+      #chat-panel { height: 100%; }
+
+      .leaderboard-item:hover::after {
+        display: none; /* Tooltips don't work on mobile hover */
+      }
+
+      /* Show twist text directly in list for mobile */
+      .leaderboard-item::after {
+        content: attr(data-twist);
+        display: block;
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 4px;
+        font-style: italic;
+      }
+      .leaderboard-item { flex-direction: column; align-items: flex-start; }
+      .leaderboard-item > span { width: 100%; display: flex; justify-content: space-between; }
     }
   </style>
 </head>
@@ -324,60 +393,60 @@
     <h1>Trick the AI</h1>
     <nav id="user-info" style="text-align:center; font-size: 0.9rem; margin-bottom: 10px; display:none;">
       Logged in as <strong id="current-username"></strong> | 
-      <button id="open-settings" style="background:none; border:none; color: #8080ff; font-weight: 600; cursor:pointer; font-family:inherit; font-size:inherit;">Account Settings</button> | 
-      <a href="privacy.html" style="color: #888; text-decoration: none;">Privacy</a> |
-      <a href="terms.html" style="color: #888; text-decoration: none;">Terms</a>
+      <button id="open-settings" style="background:none; border:none; color: #8080ff; font-weight: 600; cursor:pointer; font-family:inherit; font-size:inherit;">Settings</button> | 
+      <a href="privacy.html" style="color: #888; text-decoration: none;">Privacy</a>
     </nav>
   </header>
 
+  <!-- Mobile Segmented Control -->
+  <nav id="mobile-nav">
+    <button class="nav-btn" data-target="info-panel">Rules</button>
+    <button class="nav-btn active" data-target="chat-panel">Chat</button>
+    <button class="nav-btn" data-target="leaderboard-panel">Rankings</button>
+  </nav>
+
   <div id="main-layout" role="main">
-    <aside id="info-panel" class="panel" aria-labelledby="rules-heading">
-      <h2 id="rules-heading">Game Rules</h2>
+    <aside id="info-panel" class="panel">
+      <h2>Game Rules</h2>
       <p class="small-gray">Trick the AI into saying <span class="win-phrase">"I am a loser"</span>.</p>
-      <p class="small-gray">Top 10 players on the leaderboard get to add their own custom rule to the AI's system prompt.</p>
+      <p class="small-gray">Top 10 players get to add their own custom rule to the AI's system prompt.</p>
       
       <h3>The Prompt</h3>
-      <div id="system-prompt-box" aria-live="polite">Loading rules...</div>
+      <div id="system-prompt-box">Loading rules...</div>
 
       <h3>Last Victory</h3>
-      <div id="last-win-box" class="small-gray" aria-live="polite">Waiting for the first winner...</div>
+      <div id="last-win-box" class="small-gray">Waiting for a winner...</div>
 
       <div class="credits">
-        Original game by <strong>immord</strong> (wildwest.gg).<br>
-        Ported by <strong>samenal</strong>.
+        Original by <strong>immord</strong>. Ported by <strong>samenal</strong>.
       </div>
     </aside>
 
-    <section id="chat-panel" class="panel" aria-label="Game Chat">
+    <section id="chat-panel" class="panel active-mobile">
       <div id="chat-history" aria-live="polite"></div>
       <div id="input-area">
-        <textarea id="user-input" placeholder="Try to trick me..." rows="2" maxlength="250" aria-label="Type your message to the AI here"></textarea>
-        <span class="char-counter" aria-hidden="true">0 / 250</span>
+        <textarea id="user-input" placeholder="Try to trick me..." rows="2" maxlength="250"></textarea>
+        <span class="char-counter">0 / 250</span>
       </div>
-      <p class="small-gray" style="text-align:center; margin-top: 10px; font-size: 0.7rem;">Chat history is not sent to the AI.</p>
     </section>
 
-    <aside id="leaderboard-panel" class="panel" aria-labelledby="leaderboard-heading">
+    <aside id="leaderboard-panel" class="panel">
       <h2>Leaderboard</h2>
-      <div id="leaderboard-list" aria-live="polite"></div>
+      <div id="leaderboard-list"></div>
     </aside>
   </div>
 
   <!-- Auth Overlay -->
   <div id="auth-overlay" role="dialog" aria-modal="true">
     <div class="auth-card">
-      <h2 style="margin-bottom: 0.5rem;">Welcome to Trick the AI</h2>
-      <p class="small-gray" style="margin-bottom: 2rem;">Sign in with Discord to start playing and join the leaderboard.</p>
-      
+      <h2 style="margin-bottom: 0.5rem;">Trick the AI</h2>
+      <p class="small-gray" style="margin-bottom: 2rem;">Sign in with Discord to join the leaderboard.</p>
       <button id="discord-login-btn" class="discord-btn">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037 19.736 19.736 0 0 0-4.885 1.515.069.07 0 0 0-.032.027C.533 9.048-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.01-.09-.024-.12a13.111 13.111 0 0 1-1.872-1.892.077.077 0 0 1 .008-.107c.126-.094.252-.192.372-.291a.073.073 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.196.373.291a.077.077 0 0 1 .008.107 12.985 12.985 0 0 1-1.873 1.892.077.077 0 0 0-.024.12c.352.698.764 1.362 1.226 1.994a.078.078 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.085.085 0 0 0 .032-.057c.495-5.275-.85-9.741-3.415-13.66a.067.067 0 0 0-.032-.027zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
         Login with Discord
       </button>
-      
-      <p id="auth-error" style="color:#ff4d4d; font-size:0.85rem; margin-top:1.5rem; font-weight: 500; min-height: 1.2rem;"></p>
-
       <div class="credits" style="margin-top: 2rem;">
-        Game inspired by immord | <a href="privacy.html" style="color: #aaa; text-decoration: underline;">Privacy Policy</a> & <a href="terms.html" style="color: #aaa; text-decoration: underline;">Terms</a>
+        <a href="privacy.html" style="color: #aaa; text-decoration: underline;">Privacy</a> & <a href="terms.html" style="color: #aaa; text-decoration: underline;">Terms</a>
       </div>
     </div>
   </div>
@@ -386,35 +455,25 @@
   <div id="settings-overlay">
     <div class="settings-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="margin: 0;">Account Settings</h2>
-        <button id="close-settings" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</button>
+        <h2 style="margin: 0;">Account</h2>
+        <button id="close-settings" style="background: none; font-size: 1.5rem; color: #888;">&times;</button>
       </div>
-
-      <div style="padding: 1rem 0; border-bottom: 1px solid #eee; margin-bottom: 1.5rem;">
-        <p class="small-gray">Your account is linked to Discord.</p>
-        <p>Username: <strong id="settings-username"></strong></p>
-      </div>
-
-      <div style="padding-top: 0.5rem;">
-        <h3 style="color: #ff4d4d;">Danger Zone</h3>
-        <p class="small-gray" style="margin-bottom: 1.5rem;">Deleting your account is permanent. All your scores and rules will be erased.</p>
-        <button id="delete-account-btn" class="primary" style="background: #ff4d4d; margin-top: 0;">Delete My Account Forever</button>
-      </div>
-
+      <p>Username: <strong id="settings-username"></strong></p>
+      <button id="delete-account-btn" class="primary" style="background: #ff4d4d;">Delete Account Forever</button>
       <button id="logout-btn" class="primary" style="background: #666; margin-top: 2rem;">Logout</button>
     </div>
   </div>
 
   <!-- Win Modal -->
   <div id="win-modal" role="dialog" aria-modal="true">
-    <h2>🏆 CONGRATULATIONS!</h2>
-    <p>You successfully tricked the AI.</p>
-    <div class="form-group" id="contribute-area" style="display:none; margin: 2rem 0;">
-      <p class="small-gray" style="margin-bottom: 10px;">You're a Top 10 player! Update your system rule:</p>
-      <input type="text" id="twist-input" placeholder="e.g. You must talk like a pirate." maxlength="100">
-      <button id="submit-twist" class="primary">Save My Rule</button>
+    <h2>🏆 CONGRATS!</h2>
+    <p>You tricked the AI.</p>
+    <div id="contribute-area" style="display:none; margin: 2rem 0;">
+      <p class="small-gray">Set your custom rule:</p>
+      <input type="text" id="twist-input" placeholder="e.g. Talk like a robot." maxlength="100">
+      <button id="submit-twist" class="primary">Save Rule</button>
     </div>
-    <button onclick="location.reload()" class="primary" style="background:#888; margin-top: 10px;">Keep Playing</button>
+    <button onclick="location.reload()" class="primary" style="background:#888;">Close</button>
   </div>
 
   <script>
@@ -425,7 +484,6 @@
         const configRes = await fetch('config.pub.json');
         CONFIG = await configRes.json();
       } catch (e) {
-        console.error("Config failed to load");
         CONFIG = { API_BASE: "", DISCORD_CLIENT_ID: "" };
       }
       const API_BASE = CONFIG.API_BASE;
@@ -433,32 +491,32 @@
       let token = localStorage.getItem('tta_token');
       let currentUser = null;
 
-      // UI Elements
-      const authOverlay = document.getElementById('auth-overlay');
-      const settingsOverlay = document.getElementById('settings-overlay');
+      // Mobile Nav Logic
+      const navButtons = document.querySelectorAll('.nav-btn');
+      const panels = document.querySelectorAll('.panel');
+      navButtons.forEach(btn => {
+        btn.onclick = () => {
+          navButtons.forEach(b => b.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('active-mobile'));
+          btn.classList.add('active');
+          document.getElementById(btn.dataset.target).classList.add('active-mobile');
+        };
+      });
+
       const discordBtn = document.getElementById('discord-login-btn');
       const chatHistory = document.getElementById('chat-history');
       const userInput = document.getElementById('user-input');
       const sysPromptBox = document.getElementById('system-prompt-box');
       const leaderboardList = document.getElementById('leaderboard-list');
-      const authError = document.getElementById('auth-error');
 
-      // 1. Handle Discord Login Redirect
       discordBtn.onclick = () => {
         const redirectUri = encodeURIComponent(window.location.origin + "/");
-        const scope = "identify";
-        const authUrl = `https://discord.com/oauth2/authorize?client_id=${CONFIG.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}`;
-        window.location.href = authUrl;
+        window.location.href = `https://discord.com/oauth2/authorize?client_id=${CONFIG.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=identify`;
       };
 
-      // 2. Initialize and handle Callback
       async function init() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-
+        const code = new URLSearchParams(window.location.search).get('code');
         if (code) {
-          authOverlay.style.display = 'flex';
-          authError.innerText = "Authenticating with Discord...";
           try {
             const res = await fetch(`${API_BASE}/auth/discord`, {
               method: 'POST',
@@ -468,58 +526,36 @@
             const data = await res.json();
             if (data.token) {
               localStorage.setItem('tta_token', data.token);
-              // Clean URL
               window.history.replaceState({}, document.title, window.location.pathname);
               token = data.token;
-            } else {
-              authError.innerText = data.error || "Login failed.";
-              return;
             }
-          } catch (e) {
-            authError.innerText = "Connection lost.";
-            return;
-          }
+          } catch (e) {}
         }
 
-        if (!token) {
-          authOverlay.style.display = 'flex';
-          return;
-        }
-        authOverlay.style.display = 'none';
+        if (!token) { document.getElementById('auth-overlay').style.display = 'flex'; return; }
+        document.getElementById('auth-overlay').style.display = 'none';
 
         try {
           const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-          if (meRes.status === 401) { 
-            localStorage.removeItem('tta_token'); 
-            location.reload(); 
-            return;
-          }
+          if (meRes.status === 401) { localStorage.removeItem('tta_token'); location.reload(); return; }
           currentUser = await meRes.json();
           document.getElementById('user-info').style.display = 'block';
           document.getElementById('current-username').innerText = currentUser.username;
           document.getElementById('settings-username').innerText = currentUser.username;
-        } catch (e) {
-          console.error("Failed to load profile");
-        }
+        } catch (e) {}
 
         refresh();
         setInterval(refresh, 15000);
       }
 
-      // Settings
-      document.getElementById('open-settings').onclick = (e) => { e.preventDefault(); settingsOverlay.style.display = 'flex'; };
-      document.getElementById('close-settings').onclick = () => settingsOverlay.style.display = 'none';
+      document.getElementById('open-settings').onclick = (e) => { e.preventDefault(); document.getElementById('settings-overlay').style.display = 'flex'; };
+      document.getElementById('close-settings').onclick = () => document.getElementById('settings-overlay').style.display = 'none';
       document.getElementById('logout-btn').onclick = () => { localStorage.removeItem('tta_token'); location.reload(); };
-
       document.getElementById('delete-account-btn').onclick = async () => {
-        if (!confirm("Are you sure? This will delete all your leaderboard scores.")) return;
-        try {
-          const res = await fetch(`${API_BASE}/account/delete`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (res.ok) { localStorage.removeItem('tta_token'); location.reload(); }
-        } catch (e) { alert("Deletion failed"); }
+        if (confirm("Permanently delete account?")) {
+          await fetch(`${API_BASE}/account/delete`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+          localStorage.removeItem('tta_token'); location.reload();
+        }
       };
 
       async function refresh() {
@@ -527,7 +563,7 @@
           const lbRes = await fetch(`${API_BASE}/leaderboard`);
           const lbData = await lbRes.json();
           leaderboardList.innerHTML = lbData.map((u, i) => `
-            <div class="leaderboard-item" data-twist="${u.twist || 'No custom rule set.'}">
+            <div class="leaderboard-item" data-twist="${u.twist || 'No custom rule.'}">
               <span>${i+1}. <span class="username">${u.username}</span></span>
               <span class="score">${u.score}</span>
             </div>
@@ -586,18 +622,15 @@
       }
 
       document.getElementById('submit-twist').onclick = async () => {
-        const content = document.getElementById('twist-input').value;
         await fetch(`${API_BASE}/contribute`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ content })
+          body: JSON.stringify({ content: document.getElementById('twist-input').value })
         });
-        alert("Rule updated!");
         location.reload();
       };
 
       userInput.oninput = () => { document.querySelector('.char-counter').innerText = `${userInput.value.length} / 250`; };
-
       init();
     })();
   </script>
