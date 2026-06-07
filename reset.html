@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resetting Game State... - Trick the AI</title>
+    <style>
+        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; background: #f0f0f0; }
+        .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h1 { color: #8080ff; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Resetting...</h1>
+        <p>Clearing local storage, session storage, and cookies.</p>
+        <p>You will be redirected in a moment.</p>
+    </div>
+
+    <script>
+        // 1. Clear Storage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // 2. Clear Cookies
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        }
+
+        // 3. Redirect
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 1500);
+    </script>
+</body>
+</html>

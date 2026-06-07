@@ -21,21 +21,27 @@
         
         <h2>1. Information We Collect</h2>
         <ul>
-            <li><strong>Usernames</strong>: Used to identify you on the leaderboard.</li>
-            <li><strong>Password Hashes</strong>: Cryptographically hashed versions of your password. We never store raw passwords.</li>
-            <li><strong>Game Stats</strong>: Score, wins, and attempts to maintain competition integrity.</li>
-            <li><strong>Custom Rules</strong>: Provided by Top 10 players for the system prompt.</li>
-            <li><strong>Technical Data</strong>: IP addresses are processed by Cloudflare for bot protection (Turnstile) and security.</li>
+            <li><strong>Discord ID & Username</strong>: We use Discord OAuth for authentication. We store your unique Discord ID to link your account and your username to identify you on the leaderboard.</li>
+            <li><strong>Game Stats</strong>: We store your score, wins, and attempts to maintain leaderboard rankings and competition integrity.</li>
+            <li><strong>Custom Rules</strong>: If you reach the Top 10, we store the custom rule you provide for the AI system prompt.</li>
+            <li><strong>Technical Data</strong>: IP addresses are processed by Cloudflare for security and bot protection (Turnstile).</li>
         </ul>
 
         <h2>2. How We Use Information</h2>
-        <p>To provide the game service, prevent automated abuse, and attribute leaderboard rankings and system rules correctly.</p>
+        <ul>
+            <li>To provide the game service and maintain the leaderboard.</li>
+            <li>To prevent botting and automated abuse.</li>
+            <li><strong>Social Integration</strong>: Game events (such as winning or updating a system rule) are logged to a public Discord channel. These logs include your username and the game messages involved.</li>
+        </ul>
 
         <h2>3. Your Rights</h2>
-        <p>You can change your password or delete your account at any time via the in-game settings. Deletion erases all personal data and leaderboard entries immediately.</p>
+        <p>You can delete your account at any time via the in-game settings. Deletion immediately erases all personal data, leaderboard entries, and custom rules from our database.</p>
 
         <h2>4. Third-Party Services</h2>
-        <p>We use <strong>Cloudflare</strong> for hosting, database, and AI processing. If you link a <strong>Discord</strong> account, we store your Discord ID for authentication purposes.</p>
+        <ul>
+            <li><strong>Discord</strong>: Used for authentication and public game event logging.</li>
+            <li><strong>Cloudflare</strong>: Used for hosting, database (D1), and AI processing.</li>
+        </ul>
 
         <p><a href="index.html">&larr; Back to Game</a></p>
     </main>
