@@ -237,6 +237,10 @@
       color: #555;
     }
 
+    #leaderboard-panel {
+      overflow: visible; /* Allow tooltips to overflow the panel */
+    }
+
     .leaderboard-item {
       display: flex;
       justify-content: space-between;
@@ -248,22 +252,23 @@
       cursor: help;
     }
 
-    /* Fixed Tooltip Positioning (Moved to the LEFT of the leaderboard) */
+    /* Fixed Tooltip Positioning (Z-INDEX and OVERFLOW FIX) */
     .leaderboard-item:hover::after {
       content: attr(data-twist);
       position: absolute;
-      right: 100%; /* Position to the left of the item */
-      top: 0;
+      right: 100%; 
+      top: 50%;
+      transform: translateY(-50%); /* Center vertically relative to the item */
       width: 220px;
       background: #fff;
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      z-index: 100;
-      margin-right: 15px; /* Space between item and tooltip */
+      z-index: 1000; /* Ensure it is above everything */
+      margin-right: 15px; 
       font-size: 0.85rem;
       color: #666;
-      border-right: 4px solid #ff80ff; /* Border on the right side of tooltip */
+      border-right: 4px solid #ff80ff; 
       white-space: pre-wrap;
       pointer-events: none;
     }
@@ -597,7 +602,7 @@
           leaderboardList.innerHTML = lbData.map((u, i) => `
             <div class="leaderboard-item" data-twist="${u.twist || 'No custom rule.'}">
               <span>${i+1}. <span class="username">${u.username}</span></span>
-              <span class="score">${u.score}</span>
+              <span class="score">${u.score} ${u.score === 1 ? 'win' : 'wins'}</span>
             </div>
           `).join('');
 
