@@ -1,5 +1,5 @@
 {
-  "API_BASE": "https://cool-term-841b.samenaal.workers.dev",
+  "API_BASE": "/api",
   "TURNSTILE_SITE_KEY": "0x4AAAAAADf-RswWi-TUHQkk",
   "DISCORD_CLIENT_ID": "1513024182466642121"
 }

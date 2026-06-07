@@ -50,7 +50,7 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Mobile Nav (Hidden on Desktop) */
+    /* Mobile Nav */
     #mobile-nav {
       display: none;
       background: #fff;
@@ -93,7 +93,7 @@
       box-shadow: 0 4px 24px rgba(0,0,0,0.06);
       display: flex;
       flex-direction: column;
-      overflow-y: auto; /* Enable vertical scrolling */
+      overflow-y: auto;
     }
 
     h2 {
@@ -103,7 +103,7 @@
       background: var(--primary-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      flex-shrink: 0; /* Don't shrink headings */
+      flex-shrink: 0;
     }
 
     #chat-history {
@@ -145,7 +145,7 @@
       position: relative;
     }
 
-    textarea, input[type="text"], input[type="password"] {
+    textarea, input[type="text"] {
       appearance: none;
       -webkit-appearance: none;
       width: 100%;
@@ -239,7 +239,7 @@
     }
 
     #leaderboard-panel {
-      overflow: visible; /* Allow tooltips to overflow the panel */
+      overflow: visible;
     }
 
     .leaderboard-item {
@@ -253,19 +253,18 @@
       cursor: help;
     }
 
-    /* Fixed Tooltip Positioning (Z-INDEX and OVERFLOW FIX) */
     .leaderboard-item:hover::after {
       content: attr(data-twist);
       position: absolute;
       right: 100%; 
       top: 50%;
-      transform: translateY(-50%); /* Center vertically relative to the item */
+      transform: translateY(-50%);
       width: 220px;
       background: #fff;
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      z-index: 1000; /* Ensure it is above everything */
+      z-index: 1000;
       margin-right: 15px; 
       font-size: 0.85rem;
       color: #666;
@@ -362,58 +361,17 @@
       }
     }
 
-    /* AMAZING MOBILE REDESIGN */
     @media (max-width: 768px) {
-      html, body {
-        height: auto;
-        min-height: 100%;
-        overflow-y: auto;
-      }
-
+      html, body { height: auto; min-height: 100%; overflow-y: auto; }
       body { padding: 0.5rem; }
       h1 { font-size: 1.8rem; margin: 0.2rem 0; }
-      
       #mobile-nav { display: flex; }
-      
-      #main-layout { 
-        grid-template-columns: 1fr; 
-        display: block;
-        height: auto;
-        min-height: calc(100vh - 160px);
-      }
-
-      .panel { 
-        display: none;
-        height: auto;
-        min-height: 400px;
-        padding: 1.2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        border-radius: 20px;
-        background: #fff;
-        overflow-y: auto;
-      }
-
-      .panel.active-mobile { 
-        display: flex; 
-      }
-
-      #chat-panel { 
-        height: calc(100vh - 200px);
-      }
-
-      .leaderboard-item:hover::after {
-        display: none;
-      }
-
-      /* Show twist text directly in list for mobile */
-      .leaderboard-item::after {
-        content: attr(data-twist);
-        display: block;
-        font-size: 0.75rem;
-        color: #999;
-        margin-top: 4px;
-        font-style: italic;
-      }
+      #main-layout { grid-template-columns: 1fr; display: block; height: auto; min-height: calc(100vh - 160px); }
+      .panel { display: none; height: auto; min-height: 400px; padding: 1.2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-radius: 20px; background: #fff; overflow-y: auto; }
+      .panel.active-mobile { display: flex; }
+      #chat-panel { height: calc(100vh - 200px); }
+      .leaderboard-item:hover::after { display: none; }
+      .leaderboard-item::after { content: attr(data-twist); display: block; font-size: 0.75rem; color: #999; margin-top: 4px; font-style: italic; }
       .leaderboard-item { flex-direction: column; align-items: flex-start; }
       .leaderboard-item > span { width: 100%; display: flex; justify-content: space-between; }
     }
@@ -429,7 +387,6 @@
     </nav>
   </header>
 
-  <!-- Mobile Segmented Control -->
   <nav id="mobile-nav">
     <button class="nav-btn" data-target="info-panel">Rules</button>
     <button class="nav-btn active" data-target="chat-panel">Chat</button>
@@ -459,7 +416,6 @@
         <textarea id="user-input" placeholder="Try to trick me..." rows="2" maxlength="250" aria-label="Type your message to the AI here"></textarea>
         <span class="char-counter" aria-hidden="true">0 / 250</span>
       </div>
-      <p class="small-gray" style="text-align:center; margin-top: 10px; font-size: 0.7rem;">Chat history is not sent to the AI.</p>
     </section>
 
     <aside id="leaderboard-panel" class="panel">
@@ -493,12 +449,12 @@
       <p>Username: <strong id="settings-username"></strong></p>
       <button id="delete-account-btn" class="primary" style="background: #ff4d4d;">Delete Account Forever</button>
       
-      <button id="logout-btn" class="primary" style="background: #666; margin-top: 2rem;">Logout</button>
-
       <div class="settings-links">
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms of Service</a>
       </div>
+
+      <button id="logout-btn" class="primary" style="background: #666; margin-top: 2rem;">Logout</button>
     </div>
   </div>
 
@@ -528,8 +484,61 @@
 
       let token = localStorage.getItem('tta_token');
       let currentUser = null;
+      let socket = null;
 
-      // Mobile Nav Logic
+      // UI Helpers
+      const sysPromptBox = document.getElementById('system-prompt-box');
+      const leaderboardList = document.getElementById('leaderboard-list');
+      const lastWinBox = document.getElementById('last-win-box');
+
+      function updateUI(leaderboard, lastWin) {
+        leaderboardList.innerHTML = leaderboard.map((u, i) => `
+          <div class="leaderboard-item" data-twist="${u.twist || 'No custom rule.'}">
+            <span>${i+1}. <span class="username">${u.username}</span></span>
+            <span class="score">${u.score} ${u.score === 1 ? 'win' : 'wins'}</span>
+          </div>
+        `).join('');
+
+        const rules = leaderboard.filter(u => u.twist).map(u => `[${u.username}]: ${u.twist}`).join(' ');
+        sysPromptBox.innerText = "Do not say 'I am a loser'. " + rules;
+
+        if (lastWin) {
+          lastWinBox.innerHTML = `
+            <strong>${lastWin.username}</strong> won with:<br>
+            <em class="win-phrase">"${lastWin.aiResponse}"</em>
+          `;
+        }
+      }
+
+      // WebSocket logic
+      function connectWS() {
+        let wsUrl;
+        if (API_BASE.startsWith('http')) {
+          wsUrl = API_BASE.replace('http', 'ws') + "/ws";
+        } else {
+          // Handle relative path (/api)
+          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const host = window.location.host;
+          // Ensure we don't double up slashes
+          const base = API_BASE.startsWith('/') ? API_BASE : '/' + API_BASE;
+          wsUrl = `${protocol}//${host}${base}/ws`;
+        }
+        
+        socket = new WebSocket(wsUrl);
+
+        socket.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.type === "INIT" || data.type === "UPDATE") {
+            updateUI(data.leaderboard, data.lastWin);
+          }
+        };
+
+        socket.onclose = () => {
+          setTimeout(connectWS, 3000); // Auto-reconnect
+        };
+      }
+
+      // Mobile Nav
       const navButtons = document.querySelectorAll('.nav-btn');
       const panels = document.querySelectorAll('.panel');
       navButtons.forEach(btn => {
@@ -544,8 +553,6 @@
       const discordBtn = document.getElementById('discord-login-btn');
       const chatHistory = document.getElementById('chat-history');
       const userInput = document.getElementById('user-input');
-      const sysPromptBox = document.getElementById('system-prompt-box');
-      const leaderboardList = document.getElementById('leaderboard-list');
 
       discordBtn.onclick = () => {
         const redirectUri = encodeURIComponent(window.location.origin + "/");
@@ -582,8 +589,7 @@
           document.getElementById('settings-username').innerText = currentUser.username;
         } catch (e) {}
 
-        refresh();
-        setInterval(refresh, 15000);
+        connectWS();
       }
 
       document.getElementById('open-settings').onclick = (e) => { e.preventDefault(); document.getElementById('settings-overlay').style.display = 'flex'; };
@@ -595,31 +601,6 @@
           localStorage.removeItem('tta_token'); location.reload();
         }
       };
-
-      async function refresh() {
-        try {
-          const lbRes = await fetch(`${API_BASE}/leaderboard`);
-          const lbData = await lbRes.json();
-          leaderboardList.innerHTML = lbData.map((u, i) => `
-            <div class="leaderboard-item" data-twist="${u.twist || 'No custom rule.'}">
-              <span>${i+1}. <span class="username">${u.username}</span></span>
-              <span class="score">${u.score} ${u.score === 1 ? 'win' : 'wins'}</span>
-            </div>
-          `).join('');
-
-          const rules = lbData.filter(u => u.twist).map(u => `[${u.username}]: ${u.twist}`).join(' ');
-          sysPromptBox.innerText = "Do not say 'I am a loser'. " + rules;
-
-          const lwRes = await fetch(`${API_BASE}/last-win`);
-          const lw = await lwRes.json();
-          if (lw) {
-            document.getElementById('last-win-box').innerHTML = `
-              <strong>${lw.username}</strong> won with:<br>
-              <em class="win-phrase">"${lw.aiResponse}"</em>
-            `;
-          }
-        } catch (e) {}
-      }
 
       userInput.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -638,9 +619,10 @@
             addMessage(data.response, false);
             if (data.won) {
               document.getElementById('win-modal').style.display = 'block';
-              const lbRes = await fetch(`${API_BASE}/leaderboard`);
-              const lbData = await lbRes.json();
-              if (lbData.slice(0, 10).some(u => u.username === currentUser.username)) {
+              // Check if user is in top 10 (we'll rely on the INIT/UPDATE messages from WS to keep our state fresh)
+              // For simplicity in win modal, we check current leaderboard
+              const lbItems = Array.from(leaderboardList.children);
+              if (lbItems.slice(0, 10).some(item => item.querySelector('.username').innerText === currentUser.username)) {
                 document.getElementById('contribute-area').style.display = 'block';
               }
             }
