@@ -555,7 +555,7 @@
       const userInput = document.getElementById('user-input');
 
       discordBtn.onclick = () => {
-        const redirectUri = encodeURIComponent(window.location.origin + "/");
+        const redirectUri = encodeURIComponent(`https://${CONFIG.FRONTEND_HOST}/`);
         window.location.href = `https://discord.com/oauth2/authorize?client_id=${CONFIG.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=identify`;
       };
 
