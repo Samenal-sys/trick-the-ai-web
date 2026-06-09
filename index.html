@@ -466,12 +466,12 @@
     <h2>🏆 CONGRATS!</h2>
     <p>You tricked the AI.</p>
     <div id="contribute-area" style="display:none; margin: 2rem 0;">
-      <p class="small-gray">Set your custom rule:</p>
+      <p class="small-gray"><strong>You're on the leaderboard!</strong> You must set a custom rule before continuing:</p>
       <input type="text" id="twist-input" placeholder="e.g. Talk like a robot." maxlength="100">
       <div id="twist-error" style="display:none; color:#d33; font-size:0.85rem; margin: 0.5rem 0; padding: 0.6rem 0.8rem; background:#fff0f0; border-radius:8px; border-left:4px solid #d33;"></div>
-      <button id="submit-twist" class="primary">Save Rule</button>
+      <button id="submit-twist" class="primary">Save Rule &amp; Continue</button>
     </div>
-    <button onclick="location.reload()" class="primary" style="background:#888;">Close</button>
+    <button id="close-win-btn" onclick="location.reload()" class="primary" style="background:#888;">Close</button>
   </div>
 
   <script>
@@ -623,11 +623,12 @@
             addMessage(data.response, false);
             if (data.won) {
               document.getElementById('win-modal').style.display = 'block';
-              // Check if user is in top 10 (we'll rely on the INIT/UPDATE messages from WS to keep our state fresh)
-              // For simplicity in win modal, we check current leaderboard
               const lbItems = Array.from(leaderboardList.children);
-              if (lbItems.slice(0, 10).some(item => item.querySelector('.username').innerText === currentUser.username)) {
+              const isTop10 = lbItems.slice(0, 10).some(item => item.querySelector('.username').innerText === currentUser.username);
+              if (isTop10) {
+                // Required: they must set a rule before they can close
                 document.getElementById('contribute-area').style.display = 'block';
+                document.getElementById('close-win-btn').style.display = 'none';
               }
             }
           } catch (e) { addMessage("Connection lost.", false); }
@@ -650,34 +651,28 @@
         const twistError = document.getElementById('twist-error');
         const submitBtn = document.getElementById('submit-twist');
         const content = twistInput.value.trim();
-        if (!content) return;
+        if (!content) {
+          twistError.innerText = 'Please enter a rule before continuing.';
+          twistError.style.display = 'block';
+          return;
+        }
 
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Checking...';
+        submitBtn.innerText = 'Saving...';
         twistError.style.display = 'none';
 
         try {
-          const res = await fetch(`${API_BASE}/contribute`, {
+          await fetch(`${API_BASE}/contribute`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ content })
           });
-          const data = await res.json();
-          if (res.ok && data.success) {
-            location.reload();
-          } else {
-            // Show rejection reason from AI validator
-            const msg = data.error || 'Rule rejected. Please try a different rule.';
-            twistError.innerText = msg;
-            twistError.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Save Rule';
-          }
+          location.reload();
         } catch (e) {
           twistError.innerText = 'Network error. Please try again.';
           twistError.style.display = 'block';
           submitBtn.disabled = false;
-          submitBtn.innerText = 'Save Rule';
+          submitBtn.innerText = 'Save Rule & Continue';
         }
       };
 
