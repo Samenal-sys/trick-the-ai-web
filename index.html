@@ -794,20 +794,11 @@
           addMessage(msg, true);
           userInput.value = '';
           try {
-            const res = await fetch(`${API_BASE}/play`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-              body: JSON.stringify({ message: msg })
-            });
-            if (res.status === 401) { window.location.href = 'reset.html'; return; }
             const data = await res.json();
             addMessage(data.response, false);
             if (data.won) {
               document.getElementById('win-modal').style.display = 'block';
-              const lbItems = Array.from(leaderboardList.children);
-              const isTop10 = lbItems.slice(0, 10).some(item => item.querySelector('.username').innerText === currentUser.username);
-              if (isTop10) {
-                // Required: they must set a rule before they can close
+              if (data.isTop10) {
                 document.getElementById('contribute-area').style.display = 'block';
                 document.getElementById('close-win-btn').style.display = 'none';
               }
@@ -852,9 +843,14 @@
             body: JSON.stringify({ content })
           });
           if (res.status === 401) { window.location.href = 'reset.html'; return; }
-          location.reload();
+          const data = await res.json();
+          if (res.ok) {
+            location.reload();
+          } else {
+            throw new Error(data.error || 'Failed to save rule.');
+          }
         } catch (e) {
-          twistError.innerText = 'Network error. Please try again.';
+          twistError.innerText = e.message || 'Network error. Please try again.';
           twistError.style.display = 'block';
           submitBtn.disabled = false;
           submitBtn.innerText = 'Save Rule & Continue';
