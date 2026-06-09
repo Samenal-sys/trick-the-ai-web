@@ -538,7 +538,6 @@
         </label>
       </div>
       <p>Username: <strong id="settings-username"></strong></p>
-      <button id="delete-account-btn" class="primary" style="background: #ff4d4d;">Delete Account Forever</button>
       
       <div class="settings-links">
         <a href="privacy.html">Privacy Policy</a>
@@ -546,7 +545,11 @@
         <a href="https://discord.com/invite/Mx2Nwkr2EG" target="_blank" rel="noopener" style="color:#5865F2;">Discord</a>
       </div>
 
-      <button id="logout-btn" class="primary" style="background: #666; margin-top: 2rem;">Logout</button>
+      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+        <button id="delete-account-btn" class="primary" style="background: #ff4d4d;">Delete Account Forever</button>
+      </div>
+
+      <button id="logout-btn" class="primary" style="background: #666; margin-top: 1.5rem;">Logout</button>
     </div>
   </div>
 
@@ -702,9 +705,12 @@
       document.getElementById('close-settings').onclick = () => document.getElementById('settings-overlay').style.display = 'none';
       document.getElementById('logout-btn').onclick = () => { localStorage.removeItem('tta_token'); location.reload(); };
       document.getElementById('delete-account-btn').onclick = async () => {
-        if (confirm("Permanently delete account?")) {
+        const confirmation = prompt("This will PERMANENTLY delete your account, including your score and custom rules. If you are sure, type 'I AGREE' below:");
+        if (confirmation === "I AGREE") {
           await fetch(`${API_BASE}/account/delete`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
           localStorage.removeItem('tta_token'); location.reload();
+        } else if (confirmation !== null) {
+          alert("Deletion cancelled. You must type 'I AGREE' exactly.");
         }
       };
 
