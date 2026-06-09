@@ -794,6 +794,12 @@
           addMessage(msg, true);
           userInput.value = '';
           try {
+            const res = await fetch(`${API_BASE}/play`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ message: msg })
+            });
+            if (res.status === 401) { window.location.href = 'reset.html'; return; }
             const data = await res.json();
             addMessage(data.response, false);
             if (data.won) {
