@@ -5,11 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy - Trick the AI</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #333; }
-        h1 { color: #8080ff; }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-top: 2rem; }
-        a { color: #8080ff; text-decoration: none; }
+        :root {
+            --bg-color: #fff;
+            --text-color: #333;
+            --border-color: #eee;
+            --primary-color: #8080ff;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --text-color: #e0e0e0;
+                --border-color: #333;
+            }
+        }
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --border-color: #333;
+        }
+        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: var(--text-color); background: var(--bg-color); }
+        h1 { color: var(--primary-color); }
+        h2 { border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-top: 2rem; }
+        a { color: var(--primary-color); text-decoration: none; }
     </style>
+    <script>
+        if (localStorage.getItem('tta_dark_mode') === 'true') {
+            document.documentElement.classList.add('dark-mode');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
 </head>
 <body>
     <header>

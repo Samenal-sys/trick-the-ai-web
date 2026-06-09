@@ -5,10 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resetting Game State... - Trick the AI</title>
     <style>
-        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; background: #f0f0f0; }
-        .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h1 { color: #8080ff; margin-bottom: 1rem; }
+        :root {
+            --bg-color: #f0f0f0;
+            --card-bg: white;
+            --text-color: #333;
+            --primary-color: #8080ff;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --card-bg: #1e1e1e;
+                --text-color: #e0e0e0;
+            }
+        }
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+        }
+        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; background: var(--bg-color); color: var(--text-color); }
+        .card { background: var(--card-bg); padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary-color); margin-bottom: 1rem; }
     </style>
+    <script>
+        if (localStorage.getItem('tta_dark_mode') === 'true') {
+            document.documentElement.classList.add('dark-mode');
+            window.addEventListener('DOMContentLoaded', () => document.body.classList.add('dark-mode'));
+        }
+    </script>
 </head>
 <body>
     <div class="card">

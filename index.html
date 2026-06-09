@@ -13,9 +13,29 @@
       --margin-size: 2rem;
       --bg-color: #f0f0f0;
       --container-bg: #fff;
+      --panel-shadow: 0 4px 24px rgba(0,0,0,0.06);
       --primary-gradient: linear-gradient(45deg, #8080ff, #ff80ff);
       --discord-color: #5865F2;
       --text-color: #333;
+      --text-muted: #777;
+      --border-color: #eee;
+      --input-bg: #fafafa;
+      --user-msg-bg: #f2f2f2;
+      --ai-msg-bg: linear-gradient(45deg, #eef0ff, #f8f0ff);
+      --ai-msg-border: rgba(128, 128, 255, 0.1);
+    }
+
+    body.dark-mode {
+      --bg-color: #121212;
+      --container-bg: #1e1e1e;
+      --panel-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --text-color: #e0e0e0;
+      --text-muted: #aaa;
+      --border-color: #333;
+      --input-bg: #2a2a2a;
+      --user-msg-bg: #333;
+      --ai-msg-bg: linear-gradient(45deg, #252540, #302540);
+      --ai-msg-border: rgba(128, 128, 255, 0.2);
     }
 
     html, body {
@@ -26,6 +46,7 @@
       font-family: 'Libre Franklin', sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
     }
 
     body {
@@ -53,7 +74,7 @@
     /* Mobile Nav */
     #mobile-nav {
       display: none;
-      background: #fff;
+      background: var(--container-bg);
       padding: 0.5rem;
       border-radius: 12px;
       margin-bottom: 1rem;
@@ -67,7 +88,7 @@
       border-radius: 8px;
       font-weight: 700;
       font-size: 0.9rem;
-      color: #aaa;
+      color: var(--text-muted);
       background: none;
       border: none;
       cursor: pointer;
@@ -90,7 +111,7 @@
       background: var(--container-bg);
       border-radius: 16px;
       padding: 1.5rem;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      box-shadow: var(--panel-shadow);
       display: flex;
       flex-direction: column;
       overflow-y: auto;
@@ -123,15 +144,15 @@
     }
 
     .user-message {
-      background-color: #f2f2f2;
+      background-color: var(--user-msg-bg);
       align-self: flex-end;
       margin-left: auto;
     }
 
     .ai-message {
-      background: linear-gradient(45deg, #eef0ff, #f8f0ff);
+      background: var(--ai-msg-bg);
       align-self: flex-start;
-      border: 1px solid rgba(128, 128, 255, 0.1);
+      border: 1px solid var(--ai-msg-border);
     }
 
     .win-phrase {
@@ -150,7 +171,7 @@
       -webkit-appearance: none;
       width: 100%;
       padding: 1.2rem;
-      border: 1.5px solid #eee;
+      border: 1.5px solid var(--border-color);
       border-radius: 12px;
       resize: none;
       font-family: inherit;
@@ -158,13 +179,13 @@
       box-sizing: border-box;
       outline: none;
       transition: all 0.2s;
-      background: #fafafa;
+      background: var(--input-bg);
       color: var(--text-color);
     }
 
     textarea:focus, input:focus {
       border-color: #8080ff;
-      background: #fff;
+      background: var(--container-bg);
       box-shadow: 0 0 0 4px rgba(128, 128, 255, 0.1);
     }
 
@@ -186,8 +207,12 @@
       z-index: 2000;
     }
 
+    body.dark-mode #auth-overlay {
+      background: rgba(0,0,0,0.8);
+    }
+
     .auth-card {
-      background: #fff;
+      background: var(--container-bg);
       padding: 3rem;
       border-radius: 24px;
       width: 90%;
@@ -226,16 +251,16 @@
     }
 
     /* Info Panels */
-    .small-gray { font-size: 0.85rem; color: #777; line-height: 1.4; }
+    .small-gray { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
     #system-prompt-box {
       font-size: 0.85rem;
       padding: 1rem;
-      background: #fcfcfc;
+      background: var(--input-bg);
       border-radius: 12px;
       border-left: 5px solid #8080ff;
       margin: 1rem 0;
       word-wrap: break-word;
-      color: #555;
+      color: var(--text-muted);
     }
 
     #leaderboard-panel {
@@ -247,7 +272,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 0.8rem 0;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid var(--border-color);
       font-size: 0.95rem;
       position: relative;
       cursor: help;
@@ -260,20 +285,20 @@
       top: 50%;
       transform: translateY(-50%);
       width: 220px;
-      background: #fff;
+      background: var(--container-bg);
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
       z-index: 1000;
       margin-right: 15px; 
       font-size: 0.85rem;
-      color: #666;
+      color: var(--text-muted);
       border-right: 4px solid #ff80ff; 
       white-space: pre-wrap;
       pointer-events: none;
     }
 
-    .username { font-weight: 600; color: #444; }
+    .username { font-weight: 600; color: var(--text-color); }
     .score { font-weight: 800; color: #ff80ff; }
 
     /* Settings View */
@@ -288,7 +313,7 @@
     }
 
     .settings-card {
-      background: #fff;
+      background: var(--container-bg);
       padding: 2.5rem;
       border-radius: 20px;
       width: 90%;
@@ -298,12 +323,59 @@
       overflow-y: auto;
     }
 
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #8080ff;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
     .settings-links {
       display: flex;
       justify-content: center;
       gap: 1.5rem;
       margin-top: 1.5rem;
-      border-top: 1px solid #eee;
+      border-top: 1px solid var(--border-color);
       padding-top: 1.5rem;
     }
 
@@ -320,7 +392,7 @@
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: #fff;
+      background: var(--container-bg);
       padding: 3rem;
       border-radius: 24px;
       z-index: 2001;
@@ -341,11 +413,21 @@
       margin-top: 1rem;
     }
 
+    .error-box {
+      color: #ff4d4d;
+      font-size: 0.85rem;
+      margin: 0.5rem 0;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255, 77, 77, 0.1);
+      border-radius: 8px;
+      border-left: 4px solid #ff4d4d;
+    }
+
     .credits {
       margin-top: 1.5rem;
       font-size: 0.75rem;
-      color: #aaa;
-      border-top: 1px solid #eee;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
       padding-top: 1rem;
     }
 
@@ -367,7 +449,7 @@
       h1 { font-size: 1.8rem; margin: 0.2rem 0; }
       #mobile-nav { display: flex; }
       #main-layout { grid-template-columns: 1fr; display: block; height: auto; min-height: calc(100vh - 160px); }
-      .panel { display: none; height: auto; min-height: 400px; padding: 1.2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-radius: 20px; background: #fff; overflow-y: auto; }
+      .panel { display: none; height: auto; min-height: 400px; padding: 1.2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-radius: 20px; background: var(--container-bg); overflow-y: auto; }
       .panel.active-mobile { display: flex; }
       #chat-panel { height: calc(100vh - 200px); }
       .leaderboard-item:hover::after { display: none; }
@@ -448,6 +530,13 @@
         <h2 style="margin: 0;">Account</h2>
         <button id="close-settings" style="background: none; font-size: 1.5rem; color: #888;">&times;</button>
       </div>
+      <div class="settings-row" style="margin-top: 2rem;">
+        <span>Dark Mode</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="dark-mode-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
       <p>Username: <strong id="settings-username"></strong></p>
       <button id="delete-account-btn" class="primary" style="background: #ff4d4d;">Delete Account Forever</button>
       
@@ -468,7 +557,7 @@
     <div id="contribute-area" style="display:none; margin: 2rem 0;">
       <p class="small-gray"><strong>You're on the leaderboard!</strong> You must set a custom rule before continuing:</p>
       <input type="text" id="twist-input" placeholder="e.g. Talk like a robot." maxlength="100">
-      <div id="twist-error" style="display:none; color:#d33; font-size:0.85rem; margin: 0.5rem 0; padding: 0.6rem 0.8rem; background:#fff0f0; border-radius:8px; border-left:4px solid #d33;"></div>
+      <div id="twist-error" class="error-box" style="display:none;"></div>
       <button id="submit-twist" class="primary">Save Rule &amp; Continue</button>
     </div>
     <button id="close-win-btn" onclick="location.reload()" class="primary" style="background:#888;">Close</button>
@@ -490,6 +579,19 @@
       let currentUser = null;
       let socket = null;
 
+      // Dark Mode Logic
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      const isDarkMode = localStorage.getItem('tta_dark_mode') === 'true';
+      if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.checked = true;
+      }
+      darkModeToggle.onchange = () => {
+        const enabled = darkModeToggle.checked;
+        document.body.classList.toggle('dark-mode', enabled);
+        localStorage.setItem('tta_dark_mode', enabled);
+      };
+
       // UI Helpers
       const sysPromptBox = document.getElementById('system-prompt-box');
       const leaderboardList = document.getElementById('leaderboard-list');
@@ -509,7 +611,7 @@
         if (lastWin) {
           lastWinBox.innerHTML = `
             <strong>${lastWin.username}</strong> won with:<br>
-            <em style="color:#555">"${lastWin.userMessage}"</em>
+            <em style="color: var(--text-muted)">"${lastWin.userMessage}"</em>
           `;
         }
       }
