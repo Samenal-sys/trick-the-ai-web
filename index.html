@@ -720,7 +720,7 @@
 
         try {
           const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-          if (meRes.status === 401) { localStorage.removeItem('tta_token'); location.reload(); return; }
+          if (meRes.status === 401) { window.location.href = 'reset.html'; return; }
           currentUser = await meRes.json();
           document.getElementById('user-info').style.display = 'block';
           document.getElementById('current-username').innerText = currentUser.username;
@@ -762,9 +762,9 @@
               headers: { 'Authorization': `Bearer ${token}` } 
             });
             if (res.ok) {
-              localStorage.removeItem('tta_token'); 
-              location.reload(); 
+              window.location.href = 'reset.html'; 
             } else {
+              if (res.status === 401) { window.location.href = 'reset.html'; return; }
               throw new Error("Failed to delete account");
             }
           } catch (e) {
@@ -792,6 +792,7 @@
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
               body: JSON.stringify({ message: msg })
             });
+            if (res.status === 401) { window.location.href = 'reset.html'; return; }
             const data = await res.json();
             addMessage(data.response, false);
             if (data.won) {
@@ -835,11 +836,12 @@
         twistError.style.display = 'none';
 
         try {
-          await fetch(`${API_BASE}/contribute`, {
+          const res = await fetch(`${API_BASE}/contribute`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ content })
           });
+          if (res.status === 401) { window.location.href = 'reset.html'; return; }
           location.reload();
         } catch (e) {
           twistError.innerText = 'Network error. Please try again.';
