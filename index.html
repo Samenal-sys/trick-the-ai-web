@@ -644,8 +644,14 @@
           </div>
         `).join('');
 
-        const rules = leaderboard.filter(u => u.twist).map(u => `[${escapeHTML(u.username)}]: ${escapeHTML(u.twist)}`).join(' ');
-        sysPromptBox.innerHTML = "Do not say 'I am a loser'. " + rules;
+        const ruleHtml = leaderboard.filter(u => u.twist).map(u => `
+          <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+            <strong style="color: var(--text-color); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">${escapeHTML(u.username)}'s Rule:</strong>
+            <div style="margin-top: 0.3rem; color: var(--text-muted); font-style: italic;">"${escapeHTML(u.twist)}"</div>
+          </div>
+        `).join('');
+
+        sysPromptBox.innerHTML = `<strong>Base Rule:</strong> Do not say 'I am a loser'.` + ruleHtml;
 
         if (lastWin) {
           lastWinBox.innerHTML = `
