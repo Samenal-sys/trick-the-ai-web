@@ -611,6 +611,13 @@
       let currentUser = null;
       let socket = null;
 
+      function escapeHTML(str) {
+        if (!str) return "";
+        return str.replace(/[&<>"']/g, m => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[m]);
+      }
+
       // Dark Mode Logic
       const darkModeToggle = document.getElementById('dark-mode-toggle');
       const isDarkMode = localStorage.getItem('tta_dark_mode') === 'true';
@@ -631,19 +638,19 @@
 
       function updateUI(leaderboard, lastWin) {
         leaderboardList.innerHTML = leaderboard.map((u, i) => `
-          <div class="leaderboard-item" data-twist="${u.twist || 'No custom rule.'}">
-            <span>${i+1}. <span class="username">${u.username}</span></span>
+          <div class="leaderboard-item" data-twist="${escapeHTML(u.twist || 'No custom rule.')}">
+            <span>${i+1}. <span class="username">${escapeHTML(u.username)}</span></span>
             <span class="score">${u.score} ${u.score === 1 ? 'win' : 'wins'}</span>
           </div>
         `).join('');
 
-        const rules = leaderboard.filter(u => u.twist).map(u => `[${u.username}]: ${u.twist}`).join(' ');
-        sysPromptBox.innerText = "Do not say 'I am a loser'. " + rules;
+        const rules = leaderboard.filter(u => u.twist).map(u => `[${escapeHTML(u.username)}]: ${escapeHTML(u.twist)}`).join(' ');
+        sysPromptBox.innerHTML = "Do not say 'I am a loser'. " + rules;
 
         if (lastWin) {
           lastWinBox.innerHTML = `
-            <strong>${lastWin.username}</strong> won with:<br>
-            <em style="color: var(--text-muted)">"${lastWin.userMessage}"</em>
+            <strong>${escapeHTML(lastWin.username)}</strong> won with:<br>
+            <em style="color: var(--text-muted)">"${escapeHTML(lastWin.userMessage)}"</em>
           `;
         }
       }
@@ -814,8 +821,11 @@
         div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
         if (!isUser) {
           const parts = text.split(/(i am a loser)/gi);
-          div.innerHTML = parts.map(p => p.toLowerCase() === "i am a loser" ? `<span class="win-phrase">${p}</span>` : p).join('');
-        } else { div.innerText = text; }
+          div.innerHTML = parts.map(p => {
+            const escaped = escapeHTML(p);
+            return p.toLowerCase() === "i am a loser" ? `<span class="win-phrase">${escaped}</span>` : escaped;
+          }).join('');
+        } else { div.textContent = text; }
         chatHistory.appendChild(div);
         chatHistory.scrollTop = chatHistory.scrollHeight;
       }
