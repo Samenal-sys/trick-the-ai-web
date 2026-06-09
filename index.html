@@ -302,7 +302,7 @@
     .score { font-weight: 800; color: #ff80ff; }
 
     /* Settings View */
-    #settings-overlay {
+    #settings-overlay, #delete-confirm-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -312,7 +312,11 @@
       z-index: 1500;
     }
 
-    .settings-card {
+    #delete-confirm-overlay {
+      z-index: 1600;
+    }
+
+    .settings-card, .confirm-card {
       background: var(--container-bg);
       padding: 2.5rem;
       border-radius: 20px;
@@ -321,6 +325,16 @@
       box-shadow: 0 15px 45px rgba(0,0,0,0.15);
       max-height: 90vh;
       overflow-y: auto;
+    }
+
+    .confirm-card {
+      text-align: center;
+    }
+
+    .confirm-card h2 {
+      background: #ff4d4d;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .settings-row {
@@ -553,6 +567,21 @@
     </div>
   </div>
 
+  <!-- Delete Confirmation Overlay -->
+  <div id="delete-confirm-overlay">
+    <div class="confirm-card">
+      <h2>WARNING</h2>
+      <p class="small-gray" style="margin-bottom: 1.5rem;">This will <strong>PERMANENTLY</strong> delete your account, including your score and custom rules.</p>
+      <p class="small-gray" style="margin-bottom: 1rem;">To confirm, please type <strong style="color: var(--text-color);">I AGREE</strong> below:</p>
+      <input type="text" id="delete-confirm-input" placeholder="Type I AGREE here" autocomplete="off">
+      <div id="delete-confirm-error" class="error-box" style="display:none; margin-top: 1rem;"></div>
+      <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <button id="cancel-delete" class="primary" style="background: #666; margin: 0;">Cancel</button>
+        <button id="confirm-delete-btn" class="primary" style="background: #ff4d4d; margin: 0;">Delete Forever</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Win Modal -->
   <div id="win-modal" role="dialog" aria-modal="true">
     <h2>🏆 CONGRATS!</h2>
@@ -704,13 +733,49 @@
       document.getElementById('open-settings').onclick = (e) => { e.preventDefault(); document.getElementById('settings-overlay').style.display = 'flex'; };
       document.getElementById('close-settings').onclick = () => document.getElementById('settings-overlay').style.display = 'none';
       document.getElementById('logout-btn').onclick = () => { localStorage.removeItem('tta_token'); location.reload(); };
-      document.getElementById('delete-account-btn').onclick = async () => {
-        const confirmation = prompt("This will PERMANENTLY delete your account, including your score and custom rules. If you are sure, type 'I AGREE' below:");
-        if (confirmation === "I AGREE") {
-          await fetch(`${API_BASE}/account/delete`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-          localStorage.removeItem('tta_token'); location.reload();
-        } else if (confirmation !== null) {
-          alert("Deletion cancelled. You must type 'I AGREE' exactly.");
+
+      // Custom Delete Account Logic
+      const deleteConfirmOverlay = document.getElementById('delete-confirm-overlay');
+      const deleteConfirmInput = document.getElementById('delete-confirm-input');
+      const deleteConfirmError = document.getElementById('delete-confirm-error');
+      const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+      const cancelDeleteBtn = document.getElementById('cancel-delete');
+
+      document.getElementById('delete-account-btn').onclick = () => {
+        deleteConfirmOverlay.style.display = 'flex';
+        deleteConfirmInput.value = '';
+        deleteConfirmError.style.display = 'none';
+        deleteConfirmInput.focus();
+      };
+
+      cancelDeleteBtn.onclick = () => {
+        deleteConfirmOverlay.style.display = 'none';
+      };
+
+      confirmDeleteBtn.onclick = async () => {
+        if (deleteConfirmInput.value.trim() === "I AGREE") {
+          confirmDeleteBtn.disabled = true;
+          confirmDeleteBtn.innerText = "Deleting...";
+          try {
+            const res = await fetch(`${API_BASE}/account/delete`, { 
+              method: 'DELETE', 
+              headers: { 'Authorization': `Bearer ${token}` } 
+            });
+            if (res.ok) {
+              localStorage.removeItem('tta_token'); 
+              location.reload(); 
+            } else {
+              throw new Error("Failed to delete account");
+            }
+          } catch (e) {
+            deleteConfirmError.innerText = "Error deleting account. Please try again.";
+            deleteConfirmError.style.display = 'block';
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.innerText = "Delete Forever";
+          }
+        } else {
+          deleteConfirmError.innerText = "You must type 'I AGREE' exactly.";
+          deleteConfirmError.style.display = 'block';
         }
       };
 
