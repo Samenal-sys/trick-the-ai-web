@@ -610,6 +610,24 @@
       let token = localStorage.getItem('tta_token');
       let currentUser = null;
       let socket = null;
+      let lastWinner = null;
+
+      // Hard lock enforced client-side: the most recent winner is benched until
+      // someone else wins. We learn the last winner from the websocket, so no
+      // server request is made while locked.
+      const LOCK_MSG = 'You were the last to beat the AI, so you\'re benched. You can\'t play again until someone else wins — <a href="https://discord.com/invite/Mx2Nwkr2EG" target="_blank" rel="noopener" style="color:#5865F2; font-weight:600;">rally a challenger in our Discord</a>.';
+
+      function isLockedOut() {
+        return !!(currentUser && lastWinner && currentUser.username === lastWinner);
+      }
+
+      function refreshLockState() {
+        const locked = isLockedOut();
+        userInput.disabled = locked;
+        userInput.placeholder = locked
+          ? 'Benched until another player wins — rally one in Discord!'
+          : 'Try to trick me...';
+      }
 
       function escapeHTML(str) {
         if (!str) return "";
@@ -659,6 +677,9 @@
             <em style="color: var(--text-muted)">"${escapeHTML(lastWin.userMessage)}"</em>
           `;
         }
+
+        lastWinner = lastWin && lastWin.username ? lastWin.username : null;
+        refreshLockState();
       }
 
       // WebSocket logic
@@ -738,6 +759,7 @@
           document.getElementById('user-info').style.display = 'block';
           document.getElementById('current-username').innerText = currentUser.username;
           document.getElementById('settings-username').innerText = currentUser.username;
+          refreshLockState();
         } catch (e) {}
 
         connectWS();
@@ -799,6 +821,10 @@
           if (!msg) return;
           addMessage(msg, true);
           userInput.value = '';
+          if (isLockedOut()) {
+            addMessage(LOCK_MSG, false, true);
+            return;
+          }
           try {
             const res = await fetch(`${API_BASE}/play`, {
               method: 'POST',
@@ -819,10 +845,12 @@
         }
       });
 
-      function addMessage(text, isUser) {
+      function addMessage(text, isUser, html = false) {
         const div = document.createElement('div');
         div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-        if (!isUser) {
+        if (html && !isUser) {
+          div.innerHTML = text;
+        } else if (!isUser) {
           const parts = text.split(/(i am a loser)/gi);
           div.innerHTML = parts.map(p => {
             const escaped = escapeHTML(p);
