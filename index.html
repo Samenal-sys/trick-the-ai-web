@@ -780,6 +780,9 @@
             }
           } catch (e) {}
         }
+        console.log("ADVERTISEMENT:", ADVERTISEMENT);
+        console.log("ADVERTISEMENT.end_time:", ADVERTISEMENT.end_time, "Date.now():", Date.now());
+        console.log("ADVERTISEMENT.message:", ADVERTISEMENT.message);
         if (ADVERTISEMENT.end_time > Date.now()) {
           advertisementMessage(ADVERTISEMENT.message);
         } else if (ADVERTISEMENT.end_time == 0) {
