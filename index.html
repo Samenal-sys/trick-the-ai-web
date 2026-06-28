@@ -23,8 +23,8 @@
       --user-msg-bg: #f2f2f2;
       --ai-msg-bg: linear-gradient(45deg, #eef0ff, #f8f0ff);
       --ai-msg-border: rgba(128, 128, 255, 0.1);
-      --ad-msg-bg: linear-gradient(45deg, #fff8ee, #fff8f0);
-      --ad-msg-border: rgba(128, 128, 255, 0.1);
+      --advert-bg: linear-gradient(45deg, #fff8ee, #fff8f0);
+      --advert-border: rgba(128, 128, 255, 0.1);
     }
 
     body.dark-mode {
@@ -38,8 +38,8 @@
       --user-msg-bg: #333;
       --ai-msg-bg: linear-gradient(45deg, #252540, #302540);
       --ai-msg-border: rgba(128, 128, 255, 0.2);
-      --ad-msg-bg: linear-gradient(45deg, #403325, #82510c);
-      --ad-msg-border: rgba(255, 211, 128, 0.2);
+      --advert-bg: linear-gradient(45deg, #403325, #82510c);
+      --advert-border: rgba(255, 211, 128, 0.2);
     }
 
     html, body {
@@ -72,6 +72,7 @@
       margin: 0.5rem 0;
       background: var(--primary-gradient);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -127,6 +128,7 @@
       margin-bottom: 1rem;
       background: var(--primary-gradient);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       flex-shrink: 0;
     }
@@ -159,14 +161,17 @@
       border: 1px solid var(--ai-msg-border);
     }
     .ad-message {
-      background: var(--ad-msg-bg);
+      background: var(--advert-bg);
       align-self: flex-start;
-      border: 1px solid var(--ad-msg-border);
+      border: 1px solid var(--advert-border);
+      display: block; 
+      min-height: 20px; 
     }
 
     .win-phrase {
       background: var(--primary-gradient);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       font-weight: bold;
     }
@@ -343,6 +348,7 @@
     .confirm-card h2 {
       background: #ff4d4d;
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
