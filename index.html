@@ -605,6 +605,13 @@
       } catch (e) {
         CONFIG = { API_BASE: "", DISCORD_CLIENT_ID: "" };
       }
+      let ADVERTISEMENT;
+      try {
+        const AdsRes = await fetch('ads.json');
+        ADVERTISEMENT = await AdsRes.json();
+      } catch (e) {
+        ADVERTISEMENT = { message: "Failed to load advertisement", end_time: 0 };
+      }
       const API_BASE = CONFIG.API_BASE;
 
       let token = localStorage.getItem('tta_token');
@@ -730,6 +737,22 @@
         const redirectUri = encodeURIComponent(`https://${CONFIG.FRONTEND_HOST}/`);
         window.location.href = `https://discord.com/oauth2/authorize?client_id=${CONFIG.DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=identify`;
       };
+      function linkifyExact(text) {
+        const urlRegex = /(https?:\/\/)([^\s]+)/g;
+        return text.replace(urlRegex, (match, protocol, domainAndPath) => {
+          return `<a href='${domainAndPath}' target="_blank" rel="noopener noreferrer">${match}</a>`;
+        });
+      }
+
+      function advertisementMessage(text) {
+        const div = document.createElement('div');
+        div.className = `message ai-message`;
+        div.innerHTML = linkifyExact(text)
+        chatHistory.appendChild(div);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+
+      
 
       async function init() {
         const code = new URLSearchParams(window.location.search).get('code');
@@ -748,10 +771,16 @@
             }
           } catch (e) {}
         }
-
+        if (ADVERTISEMENT.end_time > Date.now()) {
+          advertisementMessage(ADVERTISEMENT.message);
+        } else if (ADVERTISEMENT.end_time > 0) {
+          advertisementMessage("Advertisement failed to load.");
+        } else if (ADVERTISEMENT.end_time === -1) {
+          console.log("Your advertisement could be shown here. More info in discord server");
+        }
         if (!token) { document.getElementById('auth-overlay').style.display = 'flex'; return; }
         document.getElementById('auth-overlay').style.display = 'none';
-
+        
         try {
           const meRes = await fetch(`${API_BASE}/me`, { headers: { 'Authorization': `Bearer ${token}` } });
           if (meRes.status === 401) { window.location.href = 'reset.html'; return; }
