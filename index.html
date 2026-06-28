@@ -740,7 +740,7 @@
       function linkifyExact(text) {
         const urlRegex = /(https?:\/\/)([^\s]+)/g;
         return text.replace(urlRegex, (match, protocol, domainAndPath) => {
-          return `<a href='${domainAndPath}' target="_blank" rel="noopener noreferrer">${match}</a>`;
+          return `<a href='${match}' target="_blank" rel="noopener noreferrer">${match}</a>`;
         });
       }
 
