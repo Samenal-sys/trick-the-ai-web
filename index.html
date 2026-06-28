@@ -783,13 +783,11 @@
         console.log("ADVERTISEMENT:", ADVERTISEMENT);
         console.log("ADVERTISEMENT.end_time:", ADVERTISEMENT.end_time, "Date.now():", Date.now());
         console.log("ADVERTISEMENT.message:", ADVERTISEMENT.message);
-        if (ADVERTISEMENT.end_time > Date.now()) {
+        if (ADVERTISEMENT.end_time > Date.now() | ADVERTISEMENT.end_time == -1) {
           advertisementMessage(ADVERTISEMENT.message);
         } else if (ADVERTISEMENT.end_time == 0) {
           advertisementMessage("Advertisement failed to load.");
-        } else if (ADVERTISEMENT.end_time == -1) {
-          advertisementMessage(ADVERTISEMENT.message);
-        }
+        } 
         if (!token) { document.getElementById('auth-overlay').style.display = 'flex'; return; }
         document.getElementById('auth-overlay').style.display = 'none';
         
