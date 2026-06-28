@@ -782,10 +782,10 @@
         }
         if (ADVERTISEMENT.end_time > Date.now()) {
           advertisementMessage(ADVERTISEMENT.message);
-        } else if (ADVERTISEMENT.end_time === 0) {
+        } else if (ADVERTISEMENT.end_time == 0) {
           advertisementMessage("Advertisement failed to load.");
-        } else if (ADVERTISEMENT.end_time === -1) {
-          console.log("Your advertisement could be shown here. More info in discord server");
+        } else if (ADVERTISEMENT.end_time == -1) {
+          advertisementMessage("Your advertisement could be shown here. More info in discord server");
         }
         if (!token) { document.getElementById('auth-overlay').style.display = 'flex'; return; }
         document.getElementById('auth-overlay').style.display = 'none';
