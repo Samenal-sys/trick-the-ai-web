@@ -785,7 +785,7 @@
         } else if (ADVERTISEMENT.end_time == 0) {
           advertisementMessage("Advertisement failed to load.");
         } else if (ADVERTISEMENT.end_time == -1) {
-          advertisementMessage("Your advertisement could be shown here. More info in discord server");
+          advertisementMessage(ADVERTISEMENT.message);
         }
         if (!token) { document.getElementById('auth-overlay').style.display = 'flex'; return; }
         document.getElementById('auth-overlay').style.display = 'none';
