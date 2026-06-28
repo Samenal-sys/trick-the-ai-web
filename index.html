@@ -23,6 +23,8 @@
       --user-msg-bg: #f2f2f2;
       --ai-msg-bg: linear-gradient(45deg, #eef0ff, #f8f0ff);
       --ai-msg-border: rgba(128, 128, 255, 0.1);
+      --ad-msg-bg: linear-gradient(45deg, #fff8ee, #fff8f0);
+      --ad-msg-border: rgba(128, 128, 255, 0.1);
     }
 
     body.dark-mode {
@@ -36,6 +38,8 @@
       --user-msg-bg: #333;
       --ai-msg-bg: linear-gradient(45deg, #252540, #302540);
       --ai-msg-border: rgba(128, 128, 255, 0.2);
+      --ad-msg-bg: linear-gradient(45deg, #403325, #82510c);
+      --ad-msg-border: rgba(255, 211, 128, 0.2);
     }
 
     html, body {
@@ -153,6 +157,11 @@
       background: var(--ai-msg-bg);
       align-self: flex-start;
       border: 1px solid var(--ai-msg-border);
+    }
+    .ad-message {
+      background: var(--ad-msg-bg);
+      align-self: flex-start;
+      border: 1px solid var(--ad-msg-border);
     }
 
     .win-phrase {
@@ -746,7 +755,7 @@
 
       function advertisementMessage(text) {
         const div = document.createElement('div');
-        div.className = `message ai-message`;
+        div.className = `message ad-message`;
         div.innerHTML = linkifyExact(text)
         chatHistory.appendChild(div);
         chatHistory.scrollTop = chatHistory.scrollHeight;
