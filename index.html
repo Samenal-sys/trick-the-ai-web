@@ -345,6 +345,61 @@
       z-index: 1600;
     }
 
+    /* Agreement Overlay */
+    #agreement-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(10px);
+      align-items: center; justify-content: center;
+      z-index: 1800;
+    }
+
+    .agreement-card {
+      background: var(--container-bg);
+      padding: 2.5rem;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .agreement-card h2 {
+      margin-top: 0;
+      color: var(--primary-color);
+    }
+
+    .agreement-scroll {
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      max-height: 160px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .agreement-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 2rem;
+    }
+
+    .agreement-links a {
+      font-weight: 600;
+      color: var(--primary-color);
+      font-size: 0.95rem;
+    }
+
+    .agreement-links a:hover {
+      text-decoration: underline;
+    }
+
     .settings-card, .confirm-card {
       background: var(--container-bg);
       padding: 2.5rem;
@@ -564,6 +619,37 @@
         By logging in you agree to our <a href="terms.html" style="color: #aaa; text-decoration: underline;">Terms</a><br>
         <a href="https://discord.com/invite/Mx2Nwkr2EG" target="_blank" rel="noopener" style="color:#5865F2; font-weight:600; text-decoration:none;">💬 Join our Discord</a>
       </div>
+    </div>
+  </div>
+
+  <!-- Terms/Privacy Agreement Overlay -->
+  <div id="agreement-overlay" role="dialog" aria-modal="true" aria-labelledby="agreement-title">
+    <div class="agreement-card">
+      <h2 id="agreement-title">📋 Policy Update</h2>
+      <p class="small-gray" style="margin-bottom: 1.5rem;">We've updated our <strong style="color: var(--text-color);">Terms of Service</strong> and <strong style="color: var(--text-color);">Privacy Policy</strong>. Please review the summary below and agree to continue playing.</p>
+
+      <div class="agreement-scroll">
+        <strong>What this means for you:</strong>
+        <ul style="margin: 0.5rem 0 0 0; padding-left: 1.2rem;">
+          <li>We store your Discord ID and username for leaderboard and authentication purposes.</li>
+          <li>Your game messages may be stored and used for AI training.</li>
+          <li>Winning events are logged publicly to a Discord channel.</li>
+          <li>You can delete your account and all associated data at any time.</li>
+          <li>You are responsible for all actions performed from your account.</li>
+          <li>Bots and automated access are strictly prohibited.</li>
+        </ul>
+      </div>
+
+      <div class="agreement-links">
+        <a href="terms.html" target="_blank" rel="noopener">Terms of Service ↗</a>
+        <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy ↗</a>
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <button id="decline-agreement-btn" class="primary" style="background: #555; margin: 0; flex: 1;">Decline &amp; Logout</button>
+        <button id="confirm-agreement-btn" class="primary" style="background: var(--primary-color); margin: 0; flex: 2; font-weight: bold;">I Agree ✓</button>
+      </div>
+      <div id="agreement-error" class="error-box" style="display:none; margin-top: 1rem;"></div>
     </div>
   </div>
 
@@ -821,10 +907,57 @@
           document.getElementById('user-info').style.display = 'block';
           document.getElementById('current-username').innerText = currentUser.username;
           document.getElementById('settings-username').innerText = currentUser.username;
-          refreshLockState();
-        } catch (e) {}
 
-        connectWS();
+          if (currentUser.needs_policy_agreement) {
+            showAgreementOverlay(currentUser.latest_policy_version);
+          } else {
+            refreshLockState();
+            connectWS();
+          }
+        } catch (e) {}
+      }
+
+      function showAgreementOverlay(latestVersion) {
+        const overlay = document.getElementById('agreement-overlay');
+        const confirmBtn = document.getElementById('confirm-agreement-btn');
+        const declineBtn = document.getElementById('decline-agreement-btn');
+        const errorBox = document.getElementById('agreement-error');
+
+        overlay.style.display = 'flex';
+
+        confirmBtn.onclick = async () => {
+          confirmBtn.disabled = true;
+          confirmBtn.innerText = 'Saving...';
+          errorBox.style.display = 'none';
+
+          try {
+            const res = await fetch(`${API_BASE}/me/agree`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ version: latestVersion })
+            });
+
+            if (res.ok) {
+              overlay.style.display = 'none';
+              currentUser.needs_policy_agreement = false;
+              currentUser.agreed_policy_version = latestVersion;
+              refreshLockState();
+              connectWS();
+            } else {
+              throw new Error('Server error');
+            }
+          } catch (e) {
+            errorBox.innerText = 'Failed to save your agreement. Please try again.';
+            errorBox.style.display = 'block';
+            confirmBtn.disabled = false;
+            confirmBtn.innerText = 'I Agree ✓';
+          }
+        };
+
+        declineBtn.onclick = () => {
+          localStorage.removeItem('tta_token');
+          location.reload();
+        };
       }
 
       document.getElementById('open-settings').onclick = (e) => { e.preventDefault(); document.getElementById('settings-overlay').style.display = 'flex'; };
@@ -894,6 +1027,13 @@
               body: JSON.stringify({ message: msg })
             });
             if (res.status === 401) { window.location.href = 'reset.html'; return; }
+            if (res.status === 403) {
+              const errData = await res.json();
+              if (errData.error === 'AGREEMENT_REQUIRED') {
+                showAgreementOverlay(errData.latestVersion);
+                return;
+              }
+            }
             const data = await res.json();
             addMessage(data.response, false);
             if (data.won) {
